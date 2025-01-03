@@ -1,30 +1,52 @@
-import { ref, Ref, watch } from 'vue'
+import { Ref, SetupContext } from 'vue';
+import { IInnerTreeNode, IUseCore, IUseToggle, IUseLazyLoad } from './use-tree-types';
 
-export default function useToggle(data: Ref<unknown>): any {
-  const openedTree = (tree) => {
-    return tree.reduce((acc, item) => (
-      item.open
-        ? acc.concat(item, openedTree(item.children))
-        : acc.concat(item)
-    ), [])
-  }
+export function useToggle() {
+  return function useToggleFn(data: Ref<IInnerTreeNode[]>, core: IUseCore, context: SetupContext, lazyLode: IUseLazyLoad): IUseToggle {
+    const { getNode, setNodeValue } = core;
+    const { lazyLoadNodes } = lazyLode;
 
-  const openedData = ref(openedTree(data.value))
+    const expandNode = (node: IInnerTreeNode): void => {
+      if (node.disableToggle || node.loading) {
+        return;
+      }
 
-  watch(
-    () => data.value,
-    (d) => openedData.value = openedTree(d),
-    { deep: true }
-  )
-  const toggle = (target, item) => {
-    target.stopPropagation()
-    if (!item.children) return
-    item.open = !item.open
-    openedData.value = openedTree(data.value)
-  }
+      setNodeValue(node, 'expanded', true);
+      context.emit('toggle-change', node);
+    };
 
-  return {
-    openedData,
-    toggle,
-  }
+    const collapseNode = (node: IInnerTreeNode): void => {
+      if (node.disableToggle || node.loading) {
+        return;
+      }
+      setNodeValue(node, 'expanded', false);
+      context.emit('toggle-change', node);
+    };
+
+    const toggleNode = (node: IInnerTreeNode): void => {
+      if (node.disableToggle || node.loading) {
+        return;
+      }
+      if (getNode(node).expanded) {
+        collapseNode(node);
+      } else {
+        expandNode(node);
+      }
+      // 懒加载节点
+      lazyLoadNodes(node);
+    };
+
+    const expandAllNodes = (): void => {
+      data.value.forEach((node: IInnerTreeNode) => {
+        expandNode(node);
+      });
+    };
+
+    return {
+      expandNode,
+      collapseNode,
+      toggleNode,
+      expandAllNodes,
+    };
+  };
 }

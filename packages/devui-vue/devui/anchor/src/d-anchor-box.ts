@@ -1,7 +1,27 @@
-import { setActiveLink, onScroll, randomId } from './util';
-import { inBrowser } from '../../shared/util/common-var';
+import { setActiveLink, onScroll } from './utils';
+import { inBrowser, randomId } from '../../shared/utils';
+
+const cssChange = (
+  mysidebar: HTMLElement,
+  postion: string,
+  top: number,
+  left: number
+) => {
+  mysidebar.style.position = postion;
+  mysidebar.style.top = top + 'px';
+  mysidebar.style.left = left + 'px';
+};
+
+const addEvent = (function () {
+  if (inBrowser && 'addEventListener' in window) {
+    return function (elm: Element, type: string, handle: EventListenerOrEventListenerObject) {
+      elm.addEventListener(type, handle, false);
+    };
+  }
+})();
+
 export default {
-  name: 'd-anchor-box',
+  name: 'DAnchorBox',
   // 滚动区域
   // 1.监听window滚动或滚动容器滚动，切换link+active,改变#
   mounted(el: HTMLElement): void {
@@ -23,12 +43,12 @@ export default {
       cssChange(mysidebar, 'absolute', 0, 0);
     });
     window.onscroll = function () {
-      //为了保证兼容性，这里取两个值，哪个有值取哪一个
-      //scrollTop就是触发滚轮事件时滚轮的高度
+      // 为了保证兼容性，这里取两个值，哪个有值取哪一个
+      // scrollTop就是触发滚轮事件时滚轮的高度
       windoScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
       // 16为padding 8px *2 (上下边距)
       if (!document.getElementsByClassName('scrollTarget').length) {
-        if ( windoScrollTop + mysidebarHeight - 16 >= div.offsetTop + div.clientHeight ) {
+        if (windoScrollTop + mysidebarHeight - 16 >= div.offsetTop + div.clientHeight) {
           // 看不见 d-anchor-box区域
           cssChange(
             mysidebar,
@@ -56,7 +76,7 @@ export default {
       }
     };
 
-    addEvent(div, 'scroll', function () {
+    addEvent?.(div, 'scroll', function () {
       if (document.getElementsByClassName('scrollTarget').length) {
         cssChange(
           mysidebar,
@@ -70,25 +90,8 @@ export default {
     //  监听window滚动或滚动容器滚动，切换link+active,改变#
     setActiveLink(timeId);
     document.getElementsByClassName('scrollTarget').length
-      ? addEvent(div, 'scroll', onScroll)
+      ? addEvent?.(div, 'scroll', onScroll)
       : window.addEventListener('scroll', onScroll);
   },
 };
 
-const cssChange = (
-  mysidebar: HTMLElement,
-  postion: string,
-  top: number,
-  left: number
-) => {
-  mysidebar.style.position = postion;
-  mysidebar.style.top = top + 'px';
-  mysidebar.style.left = left + 'px';
-};
-const addEvent = (function () {
-  if (inBrowser && window.addEventListener) {
-    return function (elm, type, handle) {
-      elm.addEventListener(type, handle, false);
-    };
-  }
-})();

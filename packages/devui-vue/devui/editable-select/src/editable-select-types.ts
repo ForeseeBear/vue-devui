@@ -1,74 +1,111 @@
-import type { PropType, ExtractPropTypes } from 'vue'
-type HorizontalConnectionPos = 'left' | 'center' | 'right';
-type VerticalConnectionPos = 'top' | 'center' | 'bottom';
+import type { PropType, ExtractPropTypes, InjectionKey, Ref, ComputedRef } from 'vue';
 
-export interface ConnectionPosition {
-  originX: HorizontalConnectionPos
-  originY: VerticalConnectionPos
-  overlayX: HorizontalConnectionPos
-  overlayY: VerticalConnectionPos
+export interface Option {
+  label: string;
+  value: string | number;
+  disabled?: boolean;
+  [key: string]: unknown;
 }
-export interface OptionItem {
-  name: string
-  [key: string]: any
-}
-export type Options = Array<string | OptionItem>
+
+export type Options = Array<Option>;
+export type Placement =
+  | 'top'
+  | 'right'
+  | 'bottom'
+  | 'left'
+  | 'top-start'
+  | 'top-end'
+  | 'right-start'
+  | 'right-end'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'left-start'
+  | 'left-end';
+
+export type EditableSelectSize = 'sm' | 'lg';
+
 export const editableSelectProps = {
+  modelValue: {
+    type: [String, Number] as PropType<string | number>,
+  },
   appendToBody: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  modelValue: {
-    type: [String, Number] as PropType<string | number>
+  position: {
+    type: Array as PropType<Placement[]>,
+    default: () => ['bottom', 'top', 'left', 'right'],
   },
   options: {
     type: Array as PropType<Options>,
-    default: () => []
+    default: () => [],
   },
   width: {
     type: Number,
-    default: 450
   },
   maxHeight: {
-    type: Number
+    type: Number,
+  },
+  size: {
+    type: String as PropType<EditableSelectSize>,
+  },
+  placeholder: {
+    type: String,
+    default: 'Select',
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  allowClear: {
+    type: Boolean,
+    default: false,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   disabledKey: {
     type: String,
+    default: '',
   },
   remote: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  loading: {
-    type: Boolean
+  filterMethod: {
+    type: Function as PropType<(inputValue: string) => void>,
+  },
+  remoteMethod: {
+    type: Function as PropType<(inputValue: string) => void>,
   },
   enableLazyLoad: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  remoteMethod: {
-    type: Function as PropType<(inputValue: string) => Array<Options>>
+  showGlowStyle: {
+    type: Boolean,
+    default: true,
   },
-  filterMethod: {
-    type: Function as PropType<(inputValue: string) => Array<Options>>
+  maxLength: {
+    type: Number,
   },
-  searchFn: {
-    type: Function as PropType<(term: string) => Array<Options>>,
-  },
-  loadMore: {
-    type: Function as PropType<() => Array<Options>>
-  }
-} as const
+} as const;
 
-export const selectDropdownProps = {
-  options: {
-    type: Array as PropType<OptionItem[]>,
-    default: () => []
-  }
-} as const
-export type EditableSelectProps = ExtractPropTypes<typeof editableSelectProps>
-export type SelectDropdownProps = ExtractPropTypes<typeof selectDropdownProps>
+export type EditableSelectProps = ExtractPropTypes<typeof editableSelectProps>;
+
+export interface EditableSelectContext {
+  dropdownRef: Ref<HTMLElement | undefined>;
+  query: Ref<string>;
+  inputValue: Ref<string>;
+  hoveringIndex: Ref<number>;
+  loading: Ref<boolean>;
+  modelValue: Ref<string | number | undefined> | undefined;
+  emptyText: ComputedRef<string>;
+  disabledKey: string;
+  loadMore: () => void;
+  handleOptionSelect: (option: Option, byClick: boolean) => void;
+  setSoftFocus: () => void;
+}
+
+export const SELECT_KEY = Symbol('EditableSelect') as InjectionKey<EditableSelectContext>;

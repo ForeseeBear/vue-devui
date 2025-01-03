@@ -7,10 +7,7 @@ module.exports = {
     '^.+\\.(ts|tsx|js|jsx)$': [
       'babel-jest',
       {
-        presets: [
-          ['@babel/preset-env', { targets: { node: 'current' } }],
-          ['@babel/preset-typescript'],
-        ],
+        presets: [['@babel/preset-env', { targets: { node: 'current' } }], ['@babel/preset-typescript']],
         plugins: ['@vue/babel-plugin-jsx'],
       },
     ],
@@ -34,4 +31,4 @@ module.exports = {
   // The test environment that will be used for testing
   testEnvironment: 'jest-environment-jsdom',
   setupFiles: ['<rootDir>/jest.setup.js'],
-}
+};

@@ -1,23 +1,15 @@
-import type { App } from 'vue'
-import Carousel from './src/carousel'
-import CarouseItem from './src/item'
+import type { App } from 'vue';
+import Carousel from './src/carousel';
+import CarouselItem from './src/item';
 
-Carousel.install = function(app: App) {
-  app.component(Carousel.name, Carousel)
-}
-
-CarouseItem.install = function(app: App) {
-  app.component(CarouseItem.name, CarouseItem);
-}
-
-export { Carousel }
+export { Carousel, CarouselItem };
 
 export default {
   title: 'Carousel 走马灯',
   category: '数据展示',
-  status: '80%',
+  status: '100%',
   install(app: App): void {
-    app.use(Carousel as any)
-    app.use(CarouseItem as any)
-  }
-}
+    app.component(Carousel.name, Carousel);
+    app.component(CarouselItem.name, CarouselItem);
+  },
+};

@@ -2,219 +2,123 @@
 
 按钮用于开始一个即时操作。
 
-### 何时使用
+#### 何时使用
 
 标记了一个（或封装一组）操作命令，响应用户点击行为，触发相应的业务逻辑。
 
-### 主要按钮
+### 形态
 
-:::demo
+:::demo 通过`variant`设置按钮形态，目前支持`solid`、`outline`、`text`三种形态，默认为`outline`。
 
-```vue
-<template>
-  <d-button id="primaryBtn" style="margin-right: 8px">Primary</d-button>
-  <d-button :disabled="true">Disabled</d-button>
-</template>
-```
-:::
-### 次要按钮
+button/shape
 
-:::demo
-
-```vue
-<template>
-  <d-button btnStyle="common" style="margin-right: 8px">Common</d-button>
-  <d-button btnStyle="common" :disabled="true">Disabled</d-button>
-</template>
-```
 :::
 
-### 左按钮与右按钮
+### 主题色
 
-:::demo
-```vue
-<template>
-  <d-button btnStyle="primary" bsPosition="left">Left</d-button>
-  <d-button btnStyle="common" bsPosition="right">Right</d-button>
-</template>
-```
+:::demo 通过`color`设置按钮的主题色，目前支持`primary`、`secondary`、`danger`三种主题色，默认为`secondary`。<br>注意：如果`variant`设置成`solid`，则默认使用`primary`主题色。
+
+button/theme
+
 :::
 
+### 尺寸
 
-### 警示按钮
-用于标识系统中的关键操作，例如购买场景。
-:::demo
-```vue
-<template>
-  <d-button btnStyle="danger" type="submit">Buy</d-button>
-</template>
-```
+:::demo 通过`size`设置按钮尺寸，支持`sm`、`md`、`lg`三种类型的尺寸，默认为`md`。
+
+button/size
+
 :::
 
-### 警示按钮
-用于标识系统中的关键操作，例如购买场景。
-:::demo
-```vue
-<template>
-  <div class="flex flex-col space-y-xs">
-    <d-button btnStyle="primary" type="submit">主要按钮</d-button>
-    <d-button btnStyle="common" type="submit">通用按钮</d-button>
-    <d-button btnStyle="text" type="submit">文本按钮</d-button>
-    <d-button btnStyle="text-dark" type="submit">文本（暗色）按钮</d-button>
-    <d-button btnStyle="success" type="submit">成功按钮</d-button>
-    <d-button btnStyle="warning" type="submit">警告按钮</d-button>
-  </div>
-</template>
-```
-:::
+### 禁用状态
 
-### 文字按钮
-用于标识系统中的关键操作，例如购买场景。
-:::demo
-```vue
-<template>
-  <d-button btnStyle="text" style="margin-right: 20px">Text</d-button>
-  <d-button btnStyle="text-dark" style="margin-right: 20px">Text dark</d-button>
-  <d-button btnStyle="text" :disabled="true">Disabled</d-button>
-</template>
-```
+:::demo 通过`disabled`参数设置按钮禁用状态。
+
+button/disable
+
 :::
 
 ### 加载中状态
-:::demo
-```vue
-<template>
-  <d-button :showLoading="showLoading" @click="handleClick"> click me! </d-button>
-</template>
-<script>
-  import { ref, onBeforeUnmount } from 'vue';
-  export default {
-    setup() {
-      const showLoading = ref(false);
-      const timerId = ref();      
-      const handleClick = () => {
-        showLoading.value = true;
-        timerId.value = setTimeout(() => {
-          showLoading.value = false;
-        }, 2000);
-      }
 
-      onBeforeUnmount(() => {
-        if (!timerId.value) {
-          return;
-        }
-        clearTimeout(timerId.value);
-      });
+:::demo 通过`loading`参数设置按钮加载中状态。
 
-      return { showLoading, handleClick };
-    }
-  }
-</script>
-```
+button/loading
+
 :::
 
-### 自动获得焦点
-通过autofocus设置按钮自动获得焦点。
-:::demo
-```vue
-<template>
-  <d-button btnStyle="primary" :bordered="true" :autofocus="true" style="margin-right: 8px"> Confirm </d-button>
-  <d-button btnStyle="common"> Cancel </d-button>
-</template>
-```
-:::
-
-### 图标
+### 图标按钮
 
 :::demo
-```vue
-<template>
-  <div class="mb-l">
-    <d-button icon="add" btnStyle="primary"> New </d-button>
-    <d-button icon="filter" btnStyle="common"> Filter </d-button>
-  </div>
-  <div class="mb-l">
-    <d-button icon="add" btnStyle="primary" :disabled="true"> New(disabled) </d-button>
-    <d-button icon="filter" btnStyle="common" :disabled="true"> Filter(disabled) </d-button>
-  </div>
-  <div class="mb-l">
-    <d-button icon="connect" btnStyle="text-dark" style="margin-right: 4px"> Link </d-button>
-    <d-button icon="run" btnStyle="text-dark"> Run </d-button>
-  </div>
-  <div class="mb-l">
-    <d-button class="mr-xs" icon="connect" btnStyle="text-dark" style="margin-right: 4px" :disabled="true"> Link(disabled) </d-button>
-    <d-button class="mr-xs" icon="run" btnStyle="text-dark" :disabled="true"> Run(disabled) </d-button>
-  </div>
-  <div class="mb-l">
-    <d-button class="mr-xs" icon="add" btnStyle="text-dark" title="add"></d-button>
-    <d-button class="mr-xs" icon="delete" btnStyle="text-dark" title="delete"></d-button>
-  </div>
-  <div class="mb-l">
-    <d-button icon="add" btnStyle="text-dark" :disabled="true" title="add"></d-button>
-    <d-button icon="delete" btnStyle="text-dark" :disabled="true" title="delete"></d-button>
-  </div>
-  <div class="mb-l">
-    <d-button class="mr-xs" btnStyle="common" class="mr-xs" bsSize="xs">
-      Click me
-      <span class="icon-chevron-down"></span>
-    </d-button>
-  </div>
-  <div class="mb-l">
-    <d-button class="mr-xs" btnStyle="text-dark">
-      Click me
-      <span class="icon-chevron-down"></span>
-    </d-button>
-  </div>
-</template>
-<style>
 
-.icon-chevron-down {
-  display: inline-block;
-  vertical-align: middle;
-  position: relative;
-  top: -0.1em;
-}
+button/icon
 
-</style>
-```
 :::
 
-### API
-d-button 参数
-|   参数    |       类型        |   默认    | 说明                             |
-| :-------: | :---------------: | :-------: | :------------------------------- |
-|   type    |   `IButtonType`   | 'button'  | 可选，按钮类型                   |
-| btnStyle  |  `IButtonStyle`   | 'primary' | 可选，按钮风格                   |
-| position  | `IButtonPosition` | 'default' | 可选，按钮位置                   |
-|   size    |   `IButtonSize`   |   'md'    | 可选，按钮大小                   |
-| bordered  |     `boolean`     |   false   | 可选，是否有边框                 |
-|   icon    |     `string`      |    --     | 可选，点击背景触发的事件         |
-|   width   |     `string`      |    --     | 可选，弹出框宽度(e.g '300px')    |
-| disabled  |     `boolean`     |   false   | 可选，是否禁用button             |
-| autofocus |     `boolean`     |   false   | 可选，按钮加载时是否自动获得焦点 |
+### 按钮组
 
-d-button 事件
-|  参数   |             类型              | 默认  | 说明           |
-| :-----: | :---------------------------: | :---: | :------------- |
-| onClick | `(event: MouseEvent) => void` |  --   | 可选，点击事件 |
+将多个按钮作为一组放入按钮组容器中。按钮组可通过 size 设置尺寸，并与下拉菜单混合使用。
 
+:::demo
 
-IButtonType 
-``` typescript
-type IButtonStyle = 'button' | 'submit' | 'reset';
+button/buttonGroup
+
+:::
+
+### Button 参数
+
+| 参数名   | 类型                              | 默认        | 说明                      | 跳转 Demo                 |
+| :------- | :-------------------------------- | :---------- | :------------------------ | :------------------------ |
+| variant  | [IButtonVariant](#ibuttonvariant) | 'outline'   | 可选，按钮形态            | [形态](#形态)             |
+| color    | [IButtonColor](#ibuttoncolor)     | 'secondary' | 可选，按钮主题            | [主题色](#主题色)         |
+| size     | [IButtonSize](#ibuttonsize)       | 'md'        | 可选，按钮尺寸            | [尺寸](#尺寸)             |
+| icon     | `string`                          | --          | 可选，自定义按钮图标      | [图标按钮](#图标按钮)     |
+| shape    | [IButtonShape](#ibuttonshape)     | --          | 可选，按钮形状(圆形/圆角) | [图标按钮](#图标按钮)     |
+| disabled | `boolean`                         | false       | 可选，是否禁用 button     | [禁用状态](#禁用状态)     |
+| loading  | `boolean`                         | false       | 可选，设置加载中状态      | [加载中状态](#加载中状态) |
+| native-type  | [IButtonType](#ibuttontype)    | 'button'       | 可选，按钮原生type属性      |  |
+
+### Button 类型定义
+
+#### IButtonVariant
+
+```ts
+type IButtonVariant = 'solid' | 'outline' | 'text';
 ```
 
-IButtonStyle 
-``` typescript
-type IButtonStyle = 'common' | 'primary' | 'text' | 'text-dark' | 'danger' | 'success' | 'warning';
+#### IButtonSize
+
+```ts
+type IButtonSize = 'lg' | 'md' | 'sm';
 ```
 
-IButtonPosition 
-``` typescript
-type IButtonStyle = 'left' | 'right' | 'default';
+#### IButtonColor
+
+```ts
+type IButtonColor = 'primary' | 'secondary' | 'danger';
 ```
 
-IButtonSize
-``` typescript
-type IButtonStyle = 'lg' | 'md' | 'sm' | 'xs';
+#### IButtonShape
+
+```ts
+type IButtonShape = 'circle' | 'round';
+```
+
+#### IButtonType
+
+```ts
+type IButtonType = 'button' | 'submit' | 'reset';
+```
+
+### ButtonGroup 参数
+
+| 参数名 | 类型                             | 默认 | 说明             | 跳转 Demo         |
+| :----- | :------------------------------- | :--- | :--------------- | :---------------- |
+| size   | [IButtonSize](#ibuttongroupsize) | 'md' | 可选，按钮组尺寸 | [按钮组](#按钮组) |
+
+### ButtonGroup 类型定义
+
+#### IButtonGroupSize
+
+```ts
+type IButtonGroupSize = 'lg' | 'md' | 'sm';
 ```

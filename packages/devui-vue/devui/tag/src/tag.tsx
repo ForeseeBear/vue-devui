@@ -1,62 +1,64 @@
-import { defineComponent, toRefs, ref, watch, onUnmounted } from 'vue'
-import { tagProps, TagProps } from './tag-types'
-import { useClass, useColor } from './hooks'
-import './tag.scss'
-// 类型声明
+import { defineComponent, toRefs, watch, onUnmounted, computed } from 'vue';
+import { tagProps, TagProps } from './tag-types';
+import { useClass, useColor } from './composables';
+import { useNamespace } from '../../shared/hooks/use-namespace';
+import './tag.scss';
 
 export default defineComponent({
   name: 'DTag',
   props: tagProps,
   emits: ['click', 'tagDelete', 'checkedChange'],
   setup(props: TagProps, { slots, emit }) {
-    const { type, color, checked, titleContent, deletable } = toRefs(props)
-    const tagClass = useClass(props)
-    const themeColor = useColor(props)
-    const tagTitle = titleContent.value || ''
-    const isDefaultTag = () => !type.value && !color.value
-    const isShow = ref(true)
-    // 子组件的点击事件
-    const handleClick = () => {
-      emit('click')
-    }
-    const handleDelete = () => {
-      isShow.value = false
-      emit('tagDelete')
-    }
-    const closeIconEl = () => {
-      return deletable.value ? (
-        <a class='remove-button' onClick={handleDelete}>
-          {isDefaultTag() ? (
-            <d-icon size='12px' name='error-o' color='#adb0b8' />
-          ) : (
-            <d-icon size='12px' name='close' color={themeColor.value} />
-          )}
-        </a>
-      ) : null
-    }
-    //tag 的 check 状态改变时触发的事件checkedChange
-    const unWatch = watch(checked, (newVal) => {
-      console.log('checkedChange')
+    const ns = useNamespace('tag');
+    const { type, color, checked, titleContent, deletable } = toRefs(props);
+    const tagClass = useClass(props);
+    const themeColor = useColor(props);
+    const tagTitle = titleContent.value || '';
+    const isDefaultTag = () => !type.value && !color.value;
 
-      emit('checkedChange', newVal)
-    })
-    onUnmounted(() => unWatch())
-    return () =>
-      isShow.value && (
-        <div class='devui-tag' onClick={handleClick} v-show={isShow.value}>
-          <span
-            class={tagClass.value}
-            style={{
-              display: 'block',
-              color: checked.value ? '#fff' : themeColor.value,
-              backgroundColor: checked.value ? themeColor.value : !color.value ? '' : '#fff'
-            }}
-            title={tagTitle}
-          >
-            {slots.default?.()}
-            {closeIconEl()}
-          </span>
-        </div>
-      )
-  }
-})
+    const handleClick = (e: MouseEvent) => {
+      emit('click', e);
+    };
+    const handleDelete = (e: MouseEvent) => {
+      e.stopPropagation();
+      emit('tagDelete', e);
+    };
+
+    // 计算内容的颜色
+    const contentColor = computed(() => {
+      return isDefaultTag() ? '' : checked.value ? '#fff' : themeColor.value;
+    });
+
+    // 关闭icon
+    const closeIconEl = () => {
+      const iconName = isDefaultTag() ? 'error-o' : 'close';
+
+      return deletable.value ? (
+        <a class="remove-button" onClick={handleDelete}>
+          <d-icon size="12px" name={iconName} color={contentColor.value} />
+        </a>
+      ) : null;
+    };
+
+    const unWatch = watch(checked, (newVal) => {
+      emit('checkedChange', newVal);
+    });
+    onUnmounted(() => unWatch());
+
+    return () => (
+      <div class={ns.b()} onClick={handleClick}>
+        <span
+          class={tagClass.value}
+          style={{
+            display: 'block',
+            color: contentColor.value,
+            backgroundColor: checked.value ? themeColor.value : !color.value ? '' : 'var(--devui-base-bg, #ffffff)',
+          }}
+          title={tagTitle}>
+          {slots.default?.()}
+          {closeIconEl()}
+        </span>
+      </div>
+    );
+  },
+});

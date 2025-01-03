@@ -1,56 +1,65 @@
-@import '../../style/theme/color';
-@import '../../style/theme/shadow';
-@import '../../style/theme/corner';
-@import '../../style/core/_font';
+@import '@devui/theme/styles-var/devui-var.scss';
 
-.devui-time-picker {
+.#{$devui-prefix}-time-picker {
   width: 200px;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid $devui-form-control-line;
-  position: relative;
-  transition: 0.2s;
-
-  &:hover {
-    border: 1px solid $devui-form-control-line-hover;
-  }
-
-  .time-input {
-    border: none;
-    outline: none;
-    width: 100%;
-    background-color: $devui-base-bg;
-    color: $devui-text;
-  }
 
   .time-input-icon {
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    background-color: $devui-base-bg;
+  }
 
-    div {
-      text-align: right;
-      height: 25px;
-      line-height: 22px;
-      padding: 0 4px;
-    }
+  .clear-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 10px;
   }
 }
 
-.time-picker-active {
-  border: 1px solid $devui-form-control-line-active !important;
-}
+.#{$devui-prefix}-time-picker--fade {
+  &-bottom {
+    &-enter-from,
+    &-leave-to {
+      opacity: 0.8;
+      transform: scaleY(0.8) translateY(-4px);
+    }
 
-.picker-disabled {
-  background-color: $devui-unavailable;
-  cursor: no-drop;
+    &-enter-to,
+    &-leave-from {
+      opacity: 1;
+      transform: scaleY(0.9999) translateY(0);
+    }
 
-  :not(.time-input-icon) {
-    background-color: $devui-unavailable;
-    cursor: no-drop;
+    &-enter-active {
+      transition: transform 0.2s cubic-bezier(0.16, 0.75, 0.5, 1), opacity 0.2s cubic-bezier(0.16, 0.75, 0.5, 1);
+    }
+
+    &-leave-active {
+      transition: transform 0.2s cubic-bezier(0.5, 0, 0.84, 0.25), opacity 0.2s cubic-bezier(0.5, 0, 0.84, 0.25);
+    }
+  }
+
+  &-top {
+    &-enter-from,
+    &-leave-to {
+      opacity: 0.8;
+      transform: scaleY(0.8) translateY(4px);
+    }
+
+    &-enter-to,
+    &-leave-from {
+      opacity: 1;
+      transform: scaleY(0.9999) translateY(0);
+    }
+
+    &-enter-active {
+      transition: transform 0.2s cubic-bezier(0.16, 0.75, 0.5, 1), opacity 0.2s cubic-bezier(0.16, 0.75, 0.5, 1);
+    }
+
+    &-leave-active {
+      transition: transform 0.2s cubic-bezier(0.5, 0, 0.84, 0.25), opacity 0.2s cubic-bezier(0.5, 0, 0.84, 0.25);
+    }
   }
 }

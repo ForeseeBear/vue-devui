@@ -1,13 +1,15 @@
-import { nextTick, createApp } from 'vue'
-import { mount } from '@vue/test-utils'
-import Ripple from '../index'
-import { DEFAULT_PLUGIN_OPTIONS } from '../src/options'
+import { nextTick, createApp } from 'vue';
+import { mount } from '@vue/test-utils';
+import Ripple from '../index';
+import { DEFAULT_PLUGIN_OPTIONS } from '../src/options';
+
 // 全局属性
 const global = {
   directives: {
     ripple: Ripple
   }
-}
+};
+
 describe('ripple', () => {
   it('ripple should render correctly', async () => {
     const wrapper = mount(
@@ -19,18 +21,18 @@ describe('ripple', () => {
       {
         global
       }
-    )
-    await nextTick()
-    const rippleElement = wrapper.find('.ripple-container') as any
-    await rippleElement.trigger('click')
-    console.log(rippleElement.element.childElementCount)
+    );
+    await nextTick();
+    const rippleElement = wrapper.find('.ripple-container');
+    await rippleElement.trigger('click');
 
-    expect(wrapper.find('div').exists()).toBeTruthy()
-  })
+    expect(wrapper.find('div').exists()).toBeTruthy();
+  });
+
   it('test ripple plugin', () => {
-    const app = createApp({}).use(Ripple)
-    expect(app.directive('ripple', Ripple)).toBeTruthy()
-  })
+    const app = createApp({}).use(Ripple);
+    expect(app.directive('ripple', Ripple)).toBeTruthy();
+  });
 
   it('ripple default options', () => {
     expect(DEFAULT_PLUGIN_OPTIONS).toEqual({
@@ -38,10 +40,10 @@ describe('ripple', () => {
       color: 'currentColor',
       initialOpacity: 0.2,
       finalOpacity: 0.1,
-      duration: 0.8,
+      duration: 400,
       easing: 'ease-out',
-      delayTime: 75,
+      delay: 75,
       disabled: false
-    })
-  })
-})
+    });
+  });
+});

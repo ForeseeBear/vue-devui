@@ -1,63 +1,45 @@
-import type { PropType, ExtractPropTypes, CSSProperties } from 'vue'
-import type { easingType } from './utils/animation'
+import type { ExtractPropTypes } from 'vue';
+
 export const statisticProps = {
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   value: {
-    type: [Number, String]
+    type: [Number, String],
   },
   prefix: {
-    type: String
+    type: String,
   },
   suffix: {
-    type: String
+    type: String,
   },
   precision: {
-    type: Number
+    type: Number,
   },
   groupSeparator: {
     type: String,
-    default: ','
-  },
-  showGroupSeparator: {
-    type: Boolean,
-    default: false
-  },
-  titleStyle: {
-    type: Object as PropType<CSSProperties>
-  },
-  contentStyle: {
-    type: Object as PropType<CSSProperties>
+    default: '',
   },
   animationDuration: {
     type: Number,
-    default: 2000
+    default: 2000,
   },
   valueFrom: {
-    type: Number
+    type: Number,
   },
   animation: {
     type: Boolean,
-    default: false
+    default: false,
   },
   start: {
     type: Boolean,
-    default: false
+    default: true,
   },
   extra: {
     type: String,
-    default: ''
+    default: '',
   },
-  easing: {
-    type: String as PropType<easingType>,
-    default: 'easeOutCubic'
-  },
-  delay: {
-    type: Number,
-    default: 0
-  }
-} as const
+} as const;
 
-export type StatisticProps = ExtractPropTypes<typeof statisticProps>
+export type StatisticProps = ExtractPropTypes<typeof statisticProps>;

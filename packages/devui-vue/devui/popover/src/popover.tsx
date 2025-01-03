@@ -1,138 +1,60 @@
-import { defineComponent, toRefs, ref, CSSProperties, reactive, watch } from 'vue'
-import debounce from './debounce';
-import clickoutsideDirective from '../../shared/devui-directive/clickoutside'
-import './popover.scss'
-
-type positionType = 'top' | 'right' | 'bottom' | 'left' | 'left-top' | 'left-bottom' | 'top-left' | 'top-right' | 'right-top' | 'right-bottom' | 'bottom-left' | 'bottom-right'
-type triggerType = 'click' | 'hover'
-type popType = 'success' | 'error' | 'warning' | 'info' | 'default'
-const popTypeClass = {
-  success: { name: 'right-o', color: 'rgb(61, 204, 166)' },
-  error: { name: 'error-o', color: 'rgb(249, 95, 91)' },
-  info: { name: 'info-o', color: 'rgb(81, 112, 255)' },
-  warning: { name: 'warning-o', color: 'rgb(254, 204, 85)' },
-  default: {}
-}
+import { defineComponent, toRefs, ref, Teleport, Transition, watch, provide } from 'vue';
+import { FlexibleOverlay } from '../../overlay';
+import { PopperTrigger } from '../../shared/components/popper-trigger';
+import { popoverProps, PopoverProps } from './popover-types';
+import { POPPER_TRIGGER_TOKEN } from '../../shared/components/popper-trigger/src/popper-trigger-types';
+import { usePopover, usePopoverEvent } from './use-popover';
+import PopoverIcon from './popover-icon';
+import { useNamespace } from '../../shared/hooks/use-namespace';
+import './popover.scss';
 
 export default defineComponent({
   name: 'DPopover',
-
-  directives: {
-    clickoutside: clickoutsideDirective
-  },
-
-  props: {
-    visible: {
-      type: Boolean,
-      default: false
-    },
-
-    position: {
-      type: String as () => positionType,
-      default: 'bottom'
-    },
-
-    content: {
-      type: String,
-      default: 'default'
-    },
-
-    trigger: {
-      type: String as () => triggerType,
-      default: 'click',
-    },
-
-    zIndex: {
-      type: Number as () => CSSProperties,
-      default: 1060
-    },
-
-    popType: {
-      type: String as () => popType,
-      default: 'default'
-    },
-
-    showAnimation: {
-      type: Boolean,
-      default: true
-    },
-
-    mouseEnterDelay: {
-      type: Number,
-      default: 150
-    },
-
-    mouseLeaveDelay: {
-      type: Number,
-      default: 100
-    },
-
-    popMaxWidth: {
-      type: Number,
-      default: undefined
-    },
-
-    popoverStyle: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-
-  setup(props, ctx) {
-    const { slots } = ctx;
-    const visible = ref(props.visible);
-    const {
-      position, content, zIndex, trigger, popType,
-      popoverStyle, mouseEnterDelay, mouseLeaveDelay,
-      showAnimation, popMaxWidth
-    } = toRefs(props);
-    const style: CSSProperties = { zIndex: zIndex.value, ...popoverStyle.value }
-    const isClick = trigger.value === 'click'
-    const iconType = reactive(popTypeClass[popType.value])
-    const event = function () {
-      if (visible.value) {
-        visible.value = false;
-        return
+  inheritAttrs: false,
+  props: popoverProps,
+  emits: ['show', 'hide'],
+  setup(props: PopoverProps, { slots, attrs, emit }) {
+    const { content, popType, position, offset, showAnimation } = toRefs(props);
+    const origin = ref<HTMLElement>();
+    const popoverRef = ref<HTMLElement>();
+    const visible = ref(false);
+    const { placement, handlePositionChange, onMouseenter, onMouseleave } = usePopoverEvent(props, visible, origin);
+    const { overlayStyles } = usePopover(props, visible, placement, origin, popoverRef);
+    const ns = useNamespace('popover');
+    provide(POPPER_TRIGGER_TOKEN, origin);
+    watch(visible, (newVal) => {
+      if (newVal) {
+        emit('show');
+      } else {
+        emit('hide');
       }
-      visible.value = true
-    }
-    const onClick = isClick ? event : null;
-    const enter = debounce(() => { visible.value = true }, mouseEnterDelay.value)
-    const leave = debounce(() => { visible.value = false }, mouseLeaveDelay.value)
-    const onMouseenter = isClick ? null : enter
-    const onMouseleave = isClick ? null : leave
-    const hiddenContext = () => { visible.value = false }
-    popMaxWidth.value && (style.maxWidth = `${popMaxWidth.value}px`)
+    });
 
-    watch(() => props.visible, (newVal) => {
-      visible.value = newVal;
-    })
-
-    return () => {
-      return (
-        <div class={
-          ['devui-popover',
-            position.value,
-            {
-              'devui-popover-animation': showAnimation.value,
-              'devui-popover-isVisible': visible.value
-            }
-          ]} >
-          <div
-            class='devui-popover-reference'
-            onMouseenter={onMouseenter}
-            onMouseleave={onMouseleave}
-            onClick={onClick}
-            v-clickoutside={hiddenContext}>
-            {slots.reference?.()}
-          </div>
-          <div class={['devui-popover-content', iconType.name ? 'is-icon' : '']} style={style}>
-            {iconType.name && <d-icon name={iconType.name} color={iconType.color} class="devui-popover-icon" size="16px" />}
-            {slots.content?.() || <span>{content.value}</span>}
-            <span class="after" style={style}></span>
-          </div>
-        </div>
-      )
-    }
+    return () => (
+      <>
+        <PopperTrigger>{slots.default?.()}</PopperTrigger>
+        <Teleport to="body">
+          <Transition name={showAnimation.value ? ns.m(`fade-${placement.value}`) : ''}>
+            <FlexibleOverlay
+              v-model={visible.value}
+              ref={popoverRef}
+              origin={origin.value}
+              position={position.value}
+              offset={offset.value}
+              class={[ns.e('content'), popType.value !== 'default' ? 'is-icon' : '']}
+              show-arrow
+              is-arrow-center={false}
+              style={overlayStyles.value}
+              {...attrs}
+              onPositionChange={handlePositionChange}
+              onMouseenter={onMouseenter}
+              onMouseleave={onMouseleave}>
+              <PopoverIcon type={popType.value} />
+              {slots.content?.() || <span>{content.value}</span>}
+            </FlexibleOverlay>
+          </Transition>
+        </Teleport>
+      </>
+    );
   },
-})
+});

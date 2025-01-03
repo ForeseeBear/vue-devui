@@ -1,63 +1,129 @@
-import {
-  computed,
-  defineComponent,
-  Transition,
-  watch
-} from 'vue'
-import { modalProps, ModalProps } from './modal-types'
-import { FixedOverlay } from '../../overlay'
+import { computed, defineComponent, nextTick, ref, Teleport, toRefs, Transition, watch } from 'vue';
+import { modalProps, ModalProps, ModalType } from './modal-types';
+import { Icon } from '../../icon';
+import { FixedOverlay } from '../../overlay';
+import { useModal, useModalRender } from './composables/use-modal';
+import { useDraggable } from './composables/use-draggable';
+import DModalHeader from './components/header';
+import DModalBody from './components/body';
+import { CloseIcon } from './components/modal-icons';
+import { useNamespace } from '../../shared/hooks/use-namespace';
 import './modal.scss';
+
+interface TypeList {
+  type: ModalType;
+  text: string;
+  icon: string;
+  color: string;
+}
 
 export default defineComponent({
   name: 'DModal',
+  inheritAttrs: false,
   props: modalProps,
-  emits: ['onUpdate:modelValue'],
-  setup(props: ModalProps, ctx) {
-    const animatedVisible = computed(() => {
-      return props.showAnimation ? props.modelValue : true;
+  emits: ['update:modelValue', 'close'],
+  setup(props: ModalProps, { slots, attrs, emit }) {
+    const ns = useNamespace('modal');
+    const { modelValue, title, showClose, showOverlay, appendToBody, closeOnClickOverlay, keepLast } = toRefs(props);
+    const { execClose } = useModal(props, emit);
+    useModalRender(props);
+    const dialogRef = ref<HTMLElement>();
+    const headerRef = ref<HTMLElement>();
+    const draggable = computed(() => props.draggable);
+    const { clearPosition, modalPosition } = useDraggable(dialogRef, headerRef, draggable);
+
+    watch(modelValue, (val) => {
+      if (val && !keepLast.value) {
+        clearPosition();
+        nextTick(() => {
+          const autofocus = document?.querySelector('[autofocus]');
+          if (autofocus) {
+            (autofocus as HTMLElement).focus();
+          }
+        });
+      }
     });
 
-    // 处理取消事件
-    const onVisibleChange = (value: boolean) => {
-      const update = props['onUpdate:modelValue'];
-      if (value) {
-        update?.(value);
-      } else {
-        const beforeHidden = props.beforeHidden;
-        const close = (enabledClose: boolean) => {
-          if (enabledClose) {
-            update?.(false);
-            props.onClose?.();
-          }
-        }
-        // true: 确认关闭
-        // false: 仍然开启
-        const result = (typeof beforeHidden === 'function' ? beforeHidden() : beforeHidden) ?? true;
-        if (result instanceof Promise) {
-          result.then(close);
-        } else {
-          close(result);
-        }
-      }
-    }
-
-    ctx.expose({ onVisibleChange });
+    const renderType = () => {
+      const typeList: TypeList[] = [
+        {
+          type: 'success',
+          text: '成功',
+          icon: 'right-o',
+          color: 'var(--devui-success)',
+        },
+        {
+          type: 'failed',
+          text: '错误',
+          icon: 'error-o',
+          color: 'var(--devui-danger)',
+        },
+        {
+          type: 'warning',
+          text: '警告',
+          icon: 'warning-o',
+          color: 'var(--devui-warning)',
+        },
+        {
+          type: 'info',
+          text: '信息',
+          icon: 'info-o',
+          color: 'var(--devui-info)',
+        },
+      ];
+      const item = typeList.find((i) => i.type === props.type);
+      return (
+        <div style={{ cursor: props.draggable ? 'move' : 'default' }} ref={headerRef}>
+          <DModalHeader>
+            <div class="type-content">
+              <div class="type-content-icon">
+                <Icon name={item?.icon} color={item?.color}></Icon>
+              </div>
+              <div class="type-content-text">{item?.text}</div>
+            </div>
+          </DModalHeader>
+        </div>
+      );
+    };
 
     return () => (
-      <FixedOverlay
-        visible={props.modelValue}
-        onUpdate:visible={onVisibleChange}
-        backgroundClass="devui-modal-wrapper"
-        // overlay feature
-        // backgroundStyle={{ zIndex: props.backdropZIndex }}
-        backgroundBlock={!props.bodyScrollable}
-        backdropClose={props.backdropCloseable}
-      >
-        <Transition name="devui-modal-wipe">
-          {animatedVisible.value ? ctx.slots.default?.() : null}
+      <Teleport to="body" disabled={!appendToBody.value}>
+        {showOverlay.value && (
+          <FixedOverlay
+            modelValue={modelValue.value}
+            {...{ 'onUpdate:modelValue': execClose }}
+            class={ns.e('overlay')}
+            lock-scroll={false}
+            close-on-click-overlay={closeOnClickOverlay.value}
+            style={{ zIndex: 'calc(var(--devui-z-index-modal, 1050) - 1)' }}
+          />
+        )}
+        <Transition name={props.showAnimation ? ns.m('wipe') : ''}>
+          {modelValue.value && (
+            <div
+              ref={dialogRef}
+              class={ns.b()}
+              {...attrs}
+              onClick={(e: Event) => e.stopPropagation()}
+              style={{ transform: modalPosition.value }}>
+              {showClose.value && (
+                <div onClick={execClose} class="btn-close">
+                  <Icon operable component={CloseIcon()}></Icon>
+                </div>
+              )}
+              {props.type ? (
+                renderType()
+              ) : (
+                <div style={{ cursor: props.draggable ? 'move' : 'default' }} ref={headerRef}>
+                  {slots.header ? slots.header() : title.value && <DModalHeader>{title.value}</DModalHeader>}
+                </div>
+              )}
+              <DModalBody>{slots.default?.()}</DModalBody>
+              {slots.footer?.()}
+            </div>
+          )}
         </Transition>
-      </FixedOverlay>
-    )
-  }
-})
-
+      </Teleport>
+    );
+  },
+});

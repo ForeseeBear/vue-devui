@@ -1,24 +1,26 @@
+import { resolve } from 'path';
 import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import markdown from 'vite-plugin-md';
-import path from 'path';
+import vue from '@vitejs/plugin-vue';
+import svgLoader from 'vite-svg-loader';
 
 export default defineConfig({
-  server: {
-    port: 2021,
-    open: '/',
-  },
-  plugins: [
-    vue({
-      include: [/\.vue$/, /\.md$/],
-    }), 
-    vueJsx({}),
-    markdown()
-  ],
   resolve: {
-    alias: {
-      'hooks': path.resolve(__dirname, './devui/shared/hooks')
-    }
-  }
-})
+    alias: [
+      { find: '@devui/theme', replacement: resolve(__dirname, '../devui-theme/src') },
+      { find: '@devui/shared/components', replacement: resolve(__dirname, './devui') },
+      { find: '@devui', replacement: resolve(__dirname, './devui') },
+      { find: 'vue-devui', replacement: resolve(__dirname, './devui') },
+    ],
+  },
+  plugins: [vue(), vueJsx({}), svgLoader()],
+  optimizeDeps: {
+    exclude: ['lodash-es', 'mitt', 'async-validator', 'css-vars-ponyfill', 'rxjs', '@vueuse/core', '@floating-ui/dom', 'vue-router'],
+  },
+  server: {
+    open: '/site.html',
+    fs: {
+      strict: false,
+    },
+  },
+});
