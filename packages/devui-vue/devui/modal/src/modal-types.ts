@@ -1,72 +1,67 @@
-import type { PropType, ExtractPropTypes } from 'vue'
+import type { PropType, ExtractPropTypes } from 'vue';
+
+export type ModalType = 'success' | 'failed' | 'warning' | 'info' | '';
 
 export const modalProps = {
-  // id: {
-  //   type: String,
-  //   required: true
-  // },
-  width: {
-    type: String,
-    default: '300px'
-  },
-  maxHeight: {
-    type: String,
-  },
-
-  zIndex: {
-    type: Number,
-    default: 1050
-  },
-  backdropZIndex: {
-    type: Number,
-    default: 1049
-  },
-
-  placement: {
-    type: String as PropType<'center' | 'top' | 'bottom'>,
-    default: 'center'
-  },
-  offsetX: {
-    type: String,
-    default: '0px'
-  },
-
-  offsetY: {
-    type: String,
-    default: '0px'
-  },
-
-  showAnimation: {
-    type: Boolean,
-    default: true
-  },
-  backdropCloseable: {
-    type: Boolean,
-    default: false
-  },
-  bodyScrollable: {
-    type: Boolean,
-    default: true
-  },
-
-  escapeable: {
-    type: Boolean,
-    default: true
-  },
-
-  onClose: {
-    type: Function as PropType<() => void>,
-  },
-  beforeHidden: {
-    type: [Object, Function] as PropType<Promise<boolean> | (() => boolean| Promise<boolean>)>
-  },
-
   modelValue: {
     type: Boolean,
+    default: false,
   },
-  'onUpdate:modelValue': {
-    type: Function as PropType<(value: boolean) => void>
-  }
-} as const
+  title: {
+    type: String,
+    default: '',
+  },
+  lockScroll: {
+    type: Boolean,
+    default: true,
+  },
+  draggable: {
+    type: Boolean,
+    default: true,
+  },
+  closeOnClickOverlay: {
+    type: Boolean,
+    default: true,
+  },
+  beforeClose: {
+    type: Function as PropType<(done: () => void) => void>,
+  },
+  escapable: {
+    type: Boolean,
+    default: true,
+  },
+  showClose: {
+    type: Boolean,
+    default: true,
+  },
+  showAnimation: {
+    type: Boolean,
+    default: true,
+  },
+  showOverlay: {
+    type: Boolean,
+    default: true,
+  },
+  appendToBody: {
+    type: Boolean,
+    default: true,
+  },
+  type: {
+    type: String as PropType<ModalType>,
+    default: '',
+  },
+  keepLast: {
+    type: Boolean,
+    default: false,
+  },
+};
 
-export type ModalProps = ExtractPropTypes<typeof modalProps>
+export type EmitName = 'update:modelValue' | 'close';
+
+export type EmitEventFn = (event: EmitName, result?: boolean) => void;
+
+export interface UseModal {
+  execClose: () => void;
+}
+
+export type ModalProps = ExtractPropTypes<typeof modalProps>;

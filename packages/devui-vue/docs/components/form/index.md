@@ -1,1654 +1,826 @@
 # Form 表单
 
-表单用于收集数据
+具有数据收集、校验和提交功能的表单，包含复选框、单选框、输入框、下拉选择框等元素。
 
-### 何时使用
+#### 何时使用
 
 需要进行数据收集、数据校验、数据提交功能时。
 
-
-
 ### 基础用法
 
-> done
-
-基本用法当中，Label是在数据框的上面。
-
-
-:::demo
+:::demo 默认提供水平布局，`data`参数用于设置表单数据。
 
 ```vue
 <template>
-  <d-form ref="dFormBasic" :formData="formModel" layout="vertical" @submit="onSubmitForm">
-    <d-form-item prop="name">
-      <d-form-label required hasHelp helpTips="名字可以随意填">Name</d-form-label>
-      <d-form-control extraInfo="这行是说明文字，可以不用理，你尽管填你的姓名。">
-        <d-input v-model="formModel.name" />
-      </d-form-control>
+  <d-form :data="formModel">
+    <d-form-item field="name" label="Name" help-tips="This is the plan name." extra-info="Enter a short name that meets reading habits.">
+      <d-input v-model="formModel.name" />
     </d-form-item>
-    <d-form-item prop="age">
-      <d-form-label>Age</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.age" />
-      </d-form-control>
+    <d-form-item field="description" label="Description">
+      <d-textarea v-model="formModel.description" />
     </d-form-item>
-    <d-form-item prop="city">
-      <d-form-label>City</d-form-label>
-      <d-form-control>
-        <d-select v-model="formModel.city" :options="selectOptions" />
-      </d-form-control>
+    <d-form-item field="select" label="Select">
+      <d-select v-model="formModel.select" :options="selectOptions" />
     </d-form-item>
-    <d-form-item prop="loveFruits">
-      <d-form-label>Love Fruits</d-form-label>
-      <d-form-control>
-        <d-tag-input
-          v-model:tags="formModel.loveFruits"
-          v-model:suggestionList="formModel.suggestionList"
-          display-property="name"
-          placeholder="请输入喜欢的水果"
-          no-data="暂无数据"
-        ></d-tag-input>
-      </d-form-control>
+    <d-form-item field="radio" label="Radio">
+      <d-radio-group direction="row" v-model="formModel.radio">
+        <d-radio value="0">Manual execution</d-radio>
+        <d-radio value="1">Daily execution</d-radio>
+        <d-radio value="2">Weekly execution</d-radio>
+      </d-radio-group>
     </d-form-item>
-    <d-form-item prop="sex">
-      <d-form-label>Sex</d-form-label>
-      <d-form-control>
-        <d-radio v-model="formModel.sex" value="0">男</d-radio>
-        <d-radio v-model="formModel.sex" value="1">女</d-radio>
-      </d-form-control>
+    <d-form-item field="switch" label="Switch">
+      <d-switch v-model="formModel.switch"></d-switch>
     </d-form-item>
-    <d-form-item prop="goOffWork">
-      <d-form-label>Go off work, I nerver to be a Juan King!</d-form-label>
-      <d-form-control>
-        <d-switch v-model:checked="formModel.goOffWork"></d-switch>
-      </d-form-control>
+    <d-form-item field="executionDay">
+      <template #label><span>Execution day</span></template>
+      <d-checkbox-group v-model="formModel.executionDay" label="Execution day" direction="row">
+        <d-checkbox label="Mon" value="Mon" />
+        <d-checkbox label="Tue" value="Tue" />
+        <d-checkbox label="Wed" value="Wed" />
+        <d-checkbox label="Thur" value="Thur" />
+        <d-checkbox label="Fri" value="Fri" />
+        <d-checkbox label="Sat" value="Sat" />
+        <d-checkbox label="Sun" value="Sun" />
+      </d-checkbox-group>
     </d-form-item>
-    <d-form-item prop="ladySupport">
-      <d-form-label>Which lady you would like to support?</d-form-label>
-      <d-form-control>
-        <d-checkbox-group v-model="formModel.ladySupport" label="1818黄金眼">
-          <d-checkbox label="郑女士" value="ladyZheng" />
-          <d-checkbox label="小毛" value="ladyMao" />
-          <d-checkbox label="小刘" value="ladyLiu" />
-          <d-checkbox label="小蒋" value="ladyJiang" />
-          <d-checkbox label="小滕" value="ladyTeng" />
-        </d-checkbox-group>
-      </d-form-control>
-    </d-form-item>
-    <d-form-operation class="demo-form-operation">
-      <d-button type="submit" class="demo-btn">提交</d-button>
-      <d-button bsStyle="common" @click="resetForm">重置</d-button>
+    <d-form-operation class="form-demo-form-operation">
+      <d-button variant="solid">提交</d-button>
+      <d-button>取消</d-button>
     </d-form-operation>
   </d-form>
-
 </template>
 
 <script>
-import {defineComponent, reactive, ref, nextTick} from 'vue';
+import { defineComponent, reactive, ref, nextTick } from 'vue';
 
 export default defineComponent({
-  setup(props, ctx) {
-    const dFormBasic = ref(null);
+  setup() {
     let formModel = reactive({
-      name: 'AlanLee',
-      age: '24',
-      city: '深圳',
-      loveFruits: [{name: 'apple'}],
-      suggestionList: [{name: 'apple'}, {name: 'watermalon'}, {name: 'peach'}],
-      sex: '0',
-      goOffWork: true,
-      ladySupport: ['ladyZheng'],
+      name: '',
+      description: '',
+      select: 'Options2',
+      radio: '0',
+      switch: true,
+      executionDay: [],
     });
-    const selectOptions = reactive([
-      '北京', '上海', '广州', '深圳'
-    ]);
-    const resetForm = () => {
-      console.log('formData reset before', dFormBasic.value.formData);
-      dFormBasic.value.resetFormFields();
-      console.log('formData reset after', dFormBasic.value.formData);
-    }
-    const onSubmitForm = () => {
-      console.log('onSubmitForm formModel', formModel)
-    }
+    const selectOptions = reactive(['Options1', 'Options2', 'Options3']);
     return {
-      dFormBasic,
       formModel,
       selectOptions,
-      resetForm,
-      onSubmitForm
-    }
-  }
-})
+    };
+  },
+});
 </script>
 
-
 <style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
+.form-demo-form-operation > * {
+  margin-right: 8px;
 }
-.demo-btn {
-  margin-right: 10px;
-}
-
 </style>
-
 ```
 
 :::
 
+### 表单样式
 
-### 横向排列
-
-> done
-
-Label左右布局方式。
-
-
-:::demo
+:::demo 水平排列模式下，`label-size`可以设置`label`的宽度，提供`sm`、`md`、`lg`三种大小，分别对应`80px`、`100px`、`150px`，默认为`md`；`label-align`可以设置`label`的对齐方式，可选值为`start`、`center`、`end`，默认为`start`。
 
 ```vue
 <template>
-  <d-form ref="dFormHorizontal" :formData="formModel" layout="horizontal" labelSize="lg" @submit="onSubmitForm">
-    <d-form-item prop="name">
-      <d-form-label required>Name</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.name" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="age">
-      <d-form-label>Age</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.age" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="city">
-      <d-form-label>City</d-form-label>
-      <d-form-control>
-        <d-select v-model="formModel.city" :options="selectOptions" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="loveFruits">
-      <d-form-label>Love Fruits</d-form-label>
-      <d-form-control>
-        <d-tag-input
-          v-model:tags="formModel.loveFruits"
-          v-model:suggestionList="formModel.suggestionList"
-          display-property="name"
-          placeholder="请输入喜欢的水果"
-          no-data="暂无数据"
-        ></d-tag-input>
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="sex">
-      <d-form-label>Sex</d-form-label>
-      <d-form-control>
-        <d-radio v-model="formModel.sex" value="0">男</d-radio>
-        <d-radio v-model="formModel.sex" value="1">女</d-radio>
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="goOffWork">
-      <d-form-label>Go off work</d-form-label>
-      <d-form-control>
-        <d-switch v-model:checked="formModel.goOffWork"></d-switch>
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="ladySupport">
-      <d-form-label>Support lady</d-form-label>
-      <d-form-control>
-        <d-checkbox-group v-model="formModel.ladySupport" label="1818黄金眼">
-          <d-checkbox label="郑女士" value="ladyZheng" />
-          <d-checkbox label="小毛" value="ladyMao" />
-          <d-checkbox label="小刘" value="ladyLiu" />
-          <d-checkbox label="小蒋" value="ladyJiang" />
-          <d-checkbox label="小滕" value="ladyTeng" />
-        </d-checkbox-group>
-      </d-form-control>
-    </d-form-item>
-    <d-form-operation class="demo-form-operation">
-      <d-button type="submit" class="demo-btn">提交</d-button>
-      <d-button bsStyle="common" @click="resetForm">重置</d-button>
-    </d-form-operation>
-  </d-form>
-
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormHorizontal = ref(null);
-    let formModel = reactive({
-      name: 'AlanLee',
-      age: '24',
-      city: '',
-      loveFruits: [{name: 'apple'}],
-      suggestionList: [{name: 'apple'}, {name: 'watermalon'}, {name: 'peach'}],
-      sex: '0',
-      goOffWork: true,
-      ladySupport: ['ladyZheng'],
-    });
-    const selectOptions = reactive([
-      '北京', '上海', '广州', '深圳'
-    ]);
-    const resetForm = () => {
-      console.log('dFormHorizontal', dFormHorizontal.value);
-      dFormHorizontal.value.resetFormFields();
-    }
-    const onSubmitForm = () => {
-      console.log('onSubmitForm formModel', formModel)
-    }
-    return {
-      dFormHorizontal,
-      formModel,
-      selectOptions,
-      resetForm,
-      onSubmitForm
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-### 弹框表单
-
-> todo <br>
-> 待替换为Modal组件
-
-弹框表单，弹框建议是400px，550px，700px，900px，建议宽高比是16: 9、3: 2。
-
-
-:::demo
-
-```vue
-<template>
-  <d-button @click="openModal">Open Modal</d-button>
-  <div class="my-modal" v-show="showModal" @click="closeModal">
-    <d-form ref="dFormModal" :formData="formModel" layout="horizontal" labelSize="lg" @submit="onSubmitForm" class="my-form" @click.stop="() => {}">
-      <d-form-item prop="name">
-        <d-form-label required>Name</d-form-label>
-        <d-form-control>
-          <d-input v-model="formModel.name" />
-        </d-form-control>
-      </d-form-item>
-      <d-form-item prop="age">
-        <d-form-label>Age</d-form-label>
-        <d-form-control>
-          <d-input v-model="formModel.age" />
-        </d-form-control>
-      </d-form-item>
-      <d-form-item prop="city">
-        <d-form-label>City</d-form-label>
-        <d-form-control>
-          <d-select v-model="formModel.city" :options="selectOptions" />
-        </d-form-control>
-      </d-form-item>
-      <d-form-item prop="loveFruits">
-        <d-form-label>Love Fruits</d-form-label>
-        <d-form-control>
-          <d-tag-input
-            v-model:tags="formModel.loveFruits"
-            v-model:suggestionList="formModel.suggestionList"
-            display-property="name"
-            placeholder="请输入喜欢的水果"
-            no-data="暂无数据"
-          ></d-tag-input>
-        </d-form-control>
-      </d-form-item>
-      <d-form-item prop="sex">
-        <d-form-label>Sex</d-form-label>
-        <d-form-control>
-          <d-radio v-model="formModel.sex" value="0">男</d-radio>
-          <d-radio v-model="formModel.sex" value="1">女</d-radio>
-        </d-form-control>
-      </d-form-item>
-      <d-form-item prop="goOffWork">
-        <d-form-label>Go off work</d-form-label>
-        <d-form-control>
-          <d-switch v-model:checked="formModel.goOffWork"></d-switch>
-        </d-form-control>
-      </d-form-item>
-      <d-form-item prop="ladySupport">
-        <d-form-label>Support lady</d-form-label>
-        <d-form-control>
-          <d-checkbox-group v-model="formModel.ladySupport" label="1818黄金眼">
-            <d-checkbox label="郑女士" value="ladyZheng" />
-            <d-checkbox label="小毛" value="ladyMao" />
-            <d-checkbox label="小刘" value="ladyLiu" />
-            <d-checkbox label="小蒋" value="ladyJiang" />
-            <d-checkbox label="小滕" value="ladyTeng" />
-          </d-checkbox-group>
-        </d-form-control>
-      </d-form-item>
-      <d-form-operation class="demo-form-operation">
-        <d-button type="submit" class="demo-btn">提交</d-button>
-        <d-button bsStyle="common" @click="resetForm">重置</d-button>
-      </d-form-operation>
-    </d-form>
+  <div class="form-btn-groups">
+    <div class="form-btn">
+      大小：
+      <d-radio-group direction="row" v-model="size">
+        <d-radio v-for="item in sizeList" :key="item.label" :value="item.value">
+          {{ item.label }}
+        </d-radio>
+      </d-radio-group>
+    </div>
+    <div class="form-btn">
+      对齐方式：
+      <d-radio-group direction="row" v-model="align">
+        <d-radio v-for="item in alignList" :key="item.label" :value="item.value">
+          {{ item.label }}
+        </d-radio>
+      </d-radio-group>
+    </div>
   </div>
-
+  <d-form :data="formModel" :label-size="size" :label-align="align">
+    <d-form-item field="name" label="Name">
+      <d-input v-model="formModel.name" />
+    </d-form-item>
+    <d-form-item field="description" label="Description">
+      <d-textarea v-model="formModel.description" />
+    </d-form-item>
+    <d-form-item field="executionDay" label="Execution day">
+      <d-checkbox-group v-model="formModel.executionDay" label="Execution day" direction="row">
+        <d-checkbox label="Mon" value="Mon" />
+        <d-checkbox label="Tue" value="Tue" />
+        <d-checkbox label="Wed" value="Wed" />
+        <d-checkbox label="Thur" value="Thur" />
+        <d-checkbox label="Fri" value="Fri" />
+        <d-checkbox label="Sat" value="Sat" />
+        <d-checkbox label="Sun" value="Sun" />
+      </d-checkbox-group>
+    </d-form-item>
+    <d-form-operation class="form-demo-form-operation">
+      <d-button variant="solid">提交</d-button>
+      <d-button>取消</d-button>
+    </d-form-operation>
+  </d-form>
 </template>
 
 <script>
-import {defineComponent, reactive, ref} from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
 
 export default defineComponent({
-  setup(props, ctx) {
-    const dFormModal = ref(null);
-    let formModel = reactive({
-      name: 'AlanLee',
-      age: '24',
-      city: '',
-      loveFruits: [{name: 'apple'}],
-      suggestionList: [{name: 'apple'}, {name: 'watermalon'}, {name: 'peach'}],
-      sex: '0',
-      goOffWork: true,
-      ladySupport: ['ladyZheng'],
+  setup() {
+    const formModel = reactive({
+      name: '',
+      description: '',
+      executionDay: [],
     });
-    const selectOptions = reactive([
-      '北京', '上海', '广州', '深圳'
-    ]);
-    const resetForm = () => {
-      console.log('dFormModal', dFormModal.value);
-      dFormModal.value.resetFormFields();
-    }
-    const onSubmitForm = () => {
-      console.log('onSubmitForm formModel', formModel)
-    }
-    const showModal = ref(false);
-    const openModal = () => {
-      showModal.value = true;
-    }
-    const closeModal = () => {
-      showModal.value = false;
-    }
+    const size = ref('md');
+    const align = ref('start');
+    const sizeList = [
+      {
+        label: 'Small',
+        value: 'sm',
+      },
+      {
+        label: 'Middle',
+        value: 'md',
+      },
+      {
+        label: 'Large',
+        value: 'lg',
+      },
+    ];
+    const alignList = [
+      {
+        label: 'Start',
+        value: 'start',
+      },
+      {
+        label: 'Center',
+        value: 'center',
+      },
+      {
+        label: 'End',
+        value: 'end',
+      },
+    ];
+
     return {
-      dFormModal,
       formModel,
-      selectOptions,
-      resetForm,
-      onSubmitForm,
-      showModal,
-      openModal,
-      closeModal
-    }
-  }
-})
+      size,
+      sizeList,
+      align,
+      alignList,
+    };
+  },
+});
 </script>
 
-
 <style>
-.demo-form-operation {
+.form-btn-groups {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
 }
-.demo-btn {
-  margin-right: 10px;
-}
-
-.my-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10000;
-  margin: auto;
-  background-color: rgba(0, 0, 0, 0.5);
+.form-btn {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-}
-
-.my-form {
-  background-color: #fff;
-  width: 60vw;
-  padding: 20px;
+  margin-right: 1rem;
 }
 </style>
-
 ```
 
 :::
 
+### 垂直排列
+
+:::demo 设置`layout`参数为`vertical`可启用垂直布局，即`label`在输入控件的上方。
+
+```vue
+<template>
+  <d-form layout="vertical" :data="formModel">
+    <d-form-item field="name" label="Name">
+      <d-input v-model="formModel.name" />
+    </d-form-item>
+    <d-form-item field="description" label="Description">
+      <d-textarea v-model="formModel.description" />
+    </d-form-item>
+    <d-form-item field="select" label="Select">
+      <d-select v-model="formModel.select" :options="selectOptions" />
+    </d-form-item>
+    <d-form-item field="radio" label="Radio">
+      <d-radio-group direction="row" v-model="formModel.radio">
+        <d-radio value="0">Manual execution</d-radio>
+        <d-radio value="1">Daily execution</d-radio>
+        <d-radio value="2">Weekly execution</d-radio>
+      </d-radio-group>
+    </d-form-item>
+    <d-form-item field="switch" label="Switch">
+      <d-switch v-model="formModel.switch"></d-switch>
+    </d-form-item>
+    <d-form-item field="executionDay" label="Execution day">
+      <d-checkbox-group v-model="formModel.executionDay" label="Execution day" direction="row">
+        <d-checkbox label="Mon" value="Mon" />
+        <d-checkbox label="Tue" value="Tue" />
+        <d-checkbox label="Wed" value="Wed" />
+        <d-checkbox label="Thur" value="Thur" />
+        <d-checkbox label="Fri" value="Fri" />
+        <d-checkbox label="Sat" value="Sat" />
+        <d-checkbox label="Sun" value="Sun" />
+      </d-checkbox-group>
+    </d-form-item>
+    <d-form-operation class="form-demo-form-operation">
+      <d-button variant="solid">提交</d-button>
+      <d-button>取消</d-button>
+    </d-form-operation>
+  </d-form>
+</template>
+
+<script>
+import { defineComponent, reactive } from 'vue';
+
+export default defineComponent({
+  setup() {
+    let formModel = reactive({
+      name: '',
+      description: '',
+      select: 'Options2',
+      radio: '0',
+      switch: true,
+      executionDay: [],
+    });
+    const selectOptions = reactive(['Options1', 'Options2', 'Options3']);
+
+    return {
+      formModel,
+      selectOptions,
+    };
+  },
+});
+</script>
+```
+
+:::
 
 ### 多列表单
 
-> done
-
-多列表单。layout的属性为`columns`，同时搭配columnsClass属性，值为"u-[row]-[col]"，例如`u-1-3`为1行3列。
-
-
-:::demo
+:::demo 搭配`Grid`栅格布局方案，即可方便的实现多列表单布局效果。
 
 ```vue
 <template>
-  <d-form ref="dFormColumn" layout="columns" columnsClass="u-1-3" :formData="formModel" @submit="onSubmitForm">
-    <d-form-item prop="name" v-for="(item) in 6" :key="item" class="column-item">
-      <d-form-label required hasHelp>Name</d-form-label>
-      <d-form-control>
-        <d-input />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="loveFruits" class="column-item">
-      <d-form-label>Love Fruits</d-form-label>
-      <d-form-control>
-        <d-tag-input
-          v-model:tags="formModel.loveFruits"
-          v-model:suggestionList="formModel.suggestionList"
-          display-property="name"
-          placeholder="请输入喜欢的水果"
-          no-data="暂无数据"
-        ></d-tag-input>
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="sex" class="column-item">
-      <d-form-label>Sex</d-form-label>
-      <d-form-control>
-        <d-radio v-model="formModel.sex" value="0">男</d-radio>
-        <d-radio v-model="formModel.sex" value="1">女</d-radio>
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="goOffWork" class="column-item">
-      <d-form-label>Go off work</d-form-label>
-      <d-form-control>
-        <d-switch v-model:checked="formModel.goOffWork"></d-switch>
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="ladySupport" class="column-item">
-      <d-form-label>Support lady</d-form-label>
-      <d-form-control>
-        <d-checkbox-group v-model="formModel.ladySupport" label="1818黄金眼">
-          <d-checkbox label="郑女士" value="ladyZheng" />
-          <d-checkbox label="小毛" value="ladyMao" />
-          <d-checkbox label="小刘" value="ladyLiu" />
-          <d-checkbox label="小蒋" value="ladyJiang" />
-          <d-checkbox label="小滕" value="ladyTeng" />
-        </d-checkbox-group>
-      </d-form-control>
-    </d-form-item>
-
-    <d-form-operation class="demo-form-operation">
-      <d-button type="submit" class="demo-btn">提交</d-button>
-      <d-button bsStyle="common" @click="resetForm">重置</d-button>
+  <d-form layout="vertical" :data="formModel">
+    <d-row :gutter="16">
+      <d-col :span="7">
+        <d-form-item field="name" label="Name" help-tips="This is the plan name.">
+          <d-input v-model="formModel.name" />
+        </d-form-item>
+      </d-col>
+      <d-col :span="7">
+        <d-form-item field="select" label="Select">
+          <d-select v-model="formModel.select" :options="selectOptions" />
+        </d-form-item>
+      </d-col>
+      <d-col :span="7">
+        <d-form-item field="multiSelect" label="Multiple Select">
+          <d-select v-model="formModel.multiSelect" :options="selectOptions" multiple />
+        </d-form-item>
+      </d-col>
+    </d-row>
+    <d-row :gutter="16">
+      <d-col :span="7">
+        <d-form-item field="executionDay" label="Execution day">
+          <d-checkbox-group v-model="formModel.executionDay" label="Execution day">
+            <d-checkbox label="Mon" value="Mon" />
+            <d-checkbox label="Tue" value="Tue" />
+            <d-checkbox label="Wed" value="Wed" />
+            <d-checkbox label="Thur" value="Thur" />
+            <d-checkbox label="Fri" value="Fri" />
+            <d-checkbox label="Sat" value="Sat" />
+            <d-checkbox label="Sun" value="Sun" />
+          </d-checkbox-group>
+        </d-form-item>
+      </d-col>
+      <d-col :span="7">
+        <d-form-item field="radio" label="Radio">
+          <d-radio-group direction="row" v-model="formModel.radio">
+            <d-radio value="0">Manual execution</d-radio>
+            <d-radio value="1">Daily execution</d-radio>
+            <d-radio value="2">Weekly execution</d-radio>
+          </d-radio-group>
+        </d-form-item>
+      </d-col>
+      <d-col :span="7">
+        <d-form-item field="switch" label="Switch">
+          <d-switch v-model="formModel.switch"></d-switch>
+        </d-form-item>
+      </d-col>
+    </d-row>
+    <d-form-operation class="form-demo-form-operation">
+      <d-button variant="solid">提交</d-button>
+      <d-button>取消</d-button>
     </d-form-operation>
   </d-form>
 </template>
 
 <script>
-import {defineComponent, reactive, ref} from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
 
 export default defineComponent({
-  setup(props, ctx) {
-    const dFormColumn = ref(null);
-    let formModel = reactive({
-      name: 'AlanLee',
-      age: '24',
-      city: '',
-      loveFruits: [{name: 'apple'}],
-      suggestionList: [{name: 'apple'}, {name: 'watermalon'}, {name: 'peach'}],
-      sex: '0',
-      goOffWork: true,
-      ladySupport: ['ladyZheng'],
+  setup() {
+    const formModel = reactive({
+      name: '',
+      select: 'Options2',
+      multiSelect: ref([]),
+      executionDay: [],
+      radio: '0',
+      switch: true,
     });
-    const selectOptions = reactive([
-      '北京', '上海', '广州', '深圳'
-    ]);
-    const resetForm = () => {
-      console.log('dFormColumn', dFormColumn.value);
-      dFormColumn.value.resetFormFields();
-    }
-    const onSubmitForm = () => {
-      console.log('onSubmitForm formModel', formModel)
-    }
+    const selectOptions = reactive(['Options1', 'Options2', 'Options3']);
+
+    return { formModel, selectOptions };
+  },
+});
+</script>
+```
+
+:::
+
+### 尺寸控制
+
+:::demo 通过`size`属性可控制所有控件的尺寸。
+
+```vue
+<template>
+  <div class="form-demo-set-form-size">
+    尺寸：
+    <d-radio-group direction="row" v-model="formSize">
+      <d-radio :value="item.value" v-for="item in sizeTypeList" :key="item.value">
+        {{ item.label }}
+      </d-radio>
+    </d-radio-group>
+  </div>
+
+  <d-form :data="formModel" :size="formSize">
+    <d-form-item field="name" label="Name">
+      <d-input v-model="formModel.name" placeholder="请输入" />
+    </d-form-item>
+
+    <d-form-item field="search" label="Search">
+      <d-search v-model="formModel.search" placeholder="请输入"></d-search>
+    </d-form-item>
+
+    <d-form-item field="inputNumber" label="InputNumber">
+      <d-input-number v-model="formModel.inputNumber" placeholder="请输入"></d-input-number>
+    </d-form-item>
+
+    <d-form-item field="description" label="Description">
+      <d-textarea v-model="formModel.description" />
+    </d-form-item>
+
+    <d-form-item field="select" label="Select">
+      <d-select v-model="formModel.select" :options="selectOptions" />
+    </d-form-item>
+
+    <d-form-item field="autoComplete" label="AutoComplete">
+      <d-auto-complete :source="source" v-model="formModel.autoComplete"></d-auto-complete>
+    </d-form-item>
+
+    <d-form-item field="radio" label="Radio">
+      <d-radio-group direction="row" v-model="formModel.radio">
+        <d-radio value="0">Manual execution</d-radio>
+        <d-radio value="1">Daily execution</d-radio>
+        <d-radio value="2">Weekly execution</d-radio>
+      </d-radio-group>
+    </d-form-item>
+
+    <d-form-item field="switch" label="Switch">
+      <d-switch v-model="formModel.switch"></d-switch>
+    </d-form-item>
+
+    <d-form-item field="executionDay" label="Execution day">
+      <d-checkbox-group v-model="formModel.executionDay" label="Execution day" direction="row">
+        <d-checkbox label="Mon" value="Mon" />
+        <d-checkbox label="Tue" value="Tue" />
+        <d-checkbox label="Wed" value="Wed" />
+        <d-checkbox label="Thur" value="Thur" />
+        <d-checkbox label="Fri" value="Fri" />
+        <d-checkbox label="Sat" value="Sat" />
+        <d-checkbox label="Sun" value="Sun" />
+      </d-checkbox-group>
+    </d-form-item>
+
+    <d-form-item field="datePickerPro" label="Date Picker Pro">
+      <d-date-picker-pro v-model="formModel.datePickerPro"></d-date-picker-pro>
+    </d-form-item>
+
+    <d-form-item field="timeSelect" label="Time Select">
+      <d-time-select v-model="formModel.timeSelect" />
+    </d-form-item>
+
+    <d-form-item field="timePicker" label="Time Picker">
+      <d-time-picker v-model="formModel.timePicker" placeholder="请选择时间" />
+    </d-form-item>
+
+    <d-form-operation class="form-demo-form-operation">
+      <d-button variant="solid">提交</d-button>
+      <d-button>取消</d-button>
+    </d-form-operation>
+  </d-form>
+</template>
+
+<script>
+import { defineComponent, reactive, ref } from 'vue';
+
+export default defineComponent({
+  setup() {
+    const sizeTypeList = [
+      {
+        label: 'Small',
+        value: 'sm',
+      },
+      {
+        label: 'Middle',
+        value: 'md',
+      },
+      {
+        label: 'Large',
+        value: 'lg',
+      },
+    ];
+    const formSize = ref('md');
+
+    let formModel = reactive({
+      name: '',
+      search: '',
+      inputNumber: 1,
+      description: '',
+      select: '',
+      autoComplete: '',
+      radio: '0',
+      switch: true,
+      executionDay: [],
+      datePickerPro: '',
+      timeSelect: '',
+      timePicker: '',
+    });
+
+    const selectOptions = reactive(['Options1', 'Options2', 'Options3']);
+    const source = ref(['C#', 'C', 'C++']);
+
     return {
-      dFormColumn,
+      sizeTypeList,
+      formSize,
       formModel,
+      source,
       selectOptions,
-      resetForm,
-      onSubmitForm
-    }
-  }
-})
+    };
+  },
+});
 </script>
 
 <style>
-.demo-form-operation {
+.form-demo-set-form-size {
   display: flex;
   align-items: center;
+  margin-bottom: 16px;
 }
-.demo-btn {
-  margin-right: 10px;
+
+.form-demo-form-operation > * {
+  margin-right: 8px;
 }
 </style>
-
 ```
 
 :::
 
-
-
-### 模板驱动表单验证
-
-> doing
-
-在`d-form`、`d-input`等表单类组件上使用`v-d-validate-rules`指令，配置校验规则。
-
-
-#### 验证单个元素，使用内置校验器，配置error message
-
-> done
->
-> 待支持国际化词条配置
-
-当前DevUI支持的内置校验器有：`required`、`minlength`、`maxlength`、`min`、`max`、`requiredTrue`、`email`、`pattern`、`whitespace`。
-
-- 若需限制用户输入不能全为空格，可使用`whitespace`内置校验器
-
-- 若需限制用户输入长度，将最大限制设置为实际校验值`+1`是一个好的办法。
-
-- 除`pattern`外，其他内置校验器我们也提供了内置的错误提示信息，在你未自定义提示消息时，我们将使用默认的提示信息。
-
-- message配置支持string与object两种形式（支持国际化词条配置，如`'zh-cn'`，默认将取`'default'`）。
+### 表单校验
 
 :::demo
 
 ```vue
 <template>
-  <d-form ref="dFormTemplateValidate1" :formData="formModel" labelSize="lg" >
-    <d-form-item prop="name">
-      <d-form-label required>Name</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.name" v-d-validate-rules="[
-          {
-            maxlength: 8,
-          },
-          {
-            pattern: /^[a-zA-Z\d]+(\s+[a-zA-Z\d]+)*$/, 
-            message: {
-              'zh-cn': '只能包含数字与大小写字符', 
-              'en-us': 'The value cannot contain characters except uppercase and lowercase letters.', 
-              default: '只能包含数字与大小写字符'
-            }
-          }
-        ]" />
-      </d-form-control>
+  <d-form ref="formRef" layout="vertical" :data="formData" :rules="rules" :pop-position="['right']">
+    <d-form-item
+      field="username"
+      :rules="[{ required: true, message: '用户名不能为空', trigger: 'blur' }]"
+      :show-feedback="false"
+      label="用户名"
+    >
+      <d-input v-model="formData.username" />
     </d-form-item>
-  </d-form>
-
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormTemplateValidate1 = ref(null);
-    let formModel = reactive({
-      name: 'AlanLee',
-    });
-
-    return {
-      dFormTemplateValidate1,
-      formModel,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-#### 验证单个元素，自定义校验器
-
-> done
-
-自定义校验器，可传入`validators`字段配置校验规则，你可以简单返回`true | false `来标识当前校验是否通过，来标识当前是否错误并返回错误消息，适用于动态错误提示。如果是异步校验器，可传入`asyncValidators`字段配置校验规则。
-
-:::demo
-
-```vue
-<template>
-  <d-form ref="dFormTemplateValidate2" :formData="formModel" labelSize="lg" >
-    <d-form-item prop="sum">
-      <d-form-label>计算：1 + 1 = ？</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.sum" v-d-validate-rules="{
-          validators: [
-            {message: '不对喔！', validator: customValidator},
-            {message: '答对啦！', validator: customValidator2}
-          ]
-        }" />
-      </d-form-control>
+    <d-form-item field="userInfo" label="用户信息">
+      <d-textarea v-model="formData.userInfo"></d-textarea>
     </d-form-item>
-    <d-form-item prop="asyncSum">
-      <d-form-label>计算：1 + 2 = ？（async）</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.asyncSum" v-d-validate-rules="{
-          asyncValidators: [
-            {message: '不对喔！（async）', asyncValidator: customAsyncValidator},
-            {message: '答对啦！（async）', asyncValidator: customAsyncValidator2}
-          ]
-        }" />
-      </d-form-control>
+    <d-form-item field="age" label="年龄">
+      <d-input v-model="formData.age" />
     </d-form-item>
-  </d-form>
-
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormTemplateValidate2 = ref(null);
-    let formModel = reactive({
-      sum: '',
-      asyncSum: '',
-    });
-
-    const customValidator = (rule, value) => {
-      return value == "2"; // value值等于2的时候，校验规则通过，不提示本规则中自定义的message（“不对喔！”）
-    }
-    const customValidator2 = (rule, value) => {
-      return value != "2"; // value值不等于2的时候，校验规则通过，不提示本规则中自定义的message（“答对啦！”）
-    }
-
-    const customAsyncValidator = (rule, value) => {
-      return value == "3"; // value值等于3的时候，校验规则通过，不提示本规则中自定义的message（“不对喔！（async）”）
-    }
-    const customAsyncValidator2 = (rule, value) => {
-      return value != "3"; // value值不等于3的时候，校验规则通过，不提示本规则中自定义的message（“答对啦！（async）”）
-    }
-    return {
-      dFormTemplateValidate2,
-      formModel,
-      customValidator,
-      customValidator2,
-      customAsyncValidator,
-      customAsyncValidator2,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-#### 验证单个元素，配置错误更新策略errorStrategy、校验时机updateOn
-
-> done
-
-设置`errorStrategy`属性初始化时是否进行校验， 默认配置为`dirty`，校验不通过进行错误提示；若需要在初始化时将错误抛出，可配置为`pristine`。
-
-设置`updateOn`，指定校验的时机。 校验器`updateOn`基于你绑定的模型的`updateOn`设置， 你可以通过`options`来指定， 默认为`change`，可选值还有`blur` 、`input`、`submit`、 设置为`submit`，则当元素所在表单进行提交时将触发校验。（待实现submit）
-
-:::demo
-
-```vue
-<template>
-  <d-form ref="dFormTemplateValidate3" :formData="formModel" labelSize="lg" >
-    <d-form-item prop="sum">
-      <d-form-label>计算：1 + 1 = ？</d-form-label>
-      <d-form-control extraInfo="updateOn为change，当输入完成时，输入框的值发生改变。此时触发验证规则">
-        <d-input v-model="formModel.sum" v-d-validate-rules="{
-          rules: {
-            validators: [
-              {message: '不对喔！', validator: customValidator},
-              {message: '答对啦！', validator: customValidator2}
-            ]
-          },
-          options: {
-            updateOn: 'change'
-          }
-        }" />
-      </d-form-control>
+    <d-form-item field="select" label="Select">
+      <d-select v-model="formData.select" :options="selectOptions" allow-clear />
     </d-form-item>
-    <d-form-item prop="asyncSum">
-      <d-form-label>计算：1 + 2 = ？（async）</d-form-label>
-      <d-form-control extraInfo="updateOn为input，当正在输入时，输入框的值发生改变。此时触发验证规则">
-        <d-input v-model="formModel.asyncSum" v-d-validate-rules="{
-          rules: {
-            asyncValidators: [
-              {message: '不对喔！（async）', asyncValidator: customAsyncValidator},
-              {message: '只能输入数字！', asyncValidator: customAsyncValidator2}
-            ]
-          },
-          options: {
-            updateOn: 'input'
-          }
-        }" />
-      </d-form-control>
+    <d-form-item field="autoComplete" label="AutoComplete">
+      <d-auto-complete :source="source" v-model="formData.autoComplete"></d-auto-complete>
     </d-form-item>
-    <d-form-item prop="errorSum">
-      <d-form-label>计算：1 + 1 = ？</d-form-label>
-      <d-form-control extraInfo="errorStrategy为pristine，初始化时触发验证规则">
-        <d-input v-model="formModel.errorSum" v-d-validate-rules="{
-          errorStrategy: 'pristine',
-          rules: {
-            validators: [
-              {message: '不对喔！', validator: customValidator3},
-            ]
-          },
-          options: {
-            updateOn: 'input'
-          }
-        }" />
-      </d-form-control>
+    <d-form-item field="radio" label="Radio">
+      <d-radio-group direction="row" v-model="formData.radio">
+        <d-radio value="0">Manual execution</d-radio>
+        <d-radio value="1">Daily execution</d-radio>
+        <d-radio value="2">Weekly execution</d-radio>
+      </d-radio-group>
     </d-form-item>
-  </d-form>
-
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormTemplateValidate3 = ref(null);
-    let formModel = reactive({
-      sum: '',
-      asyncSum: '',
-      errorSum: '3',
-    });
-
-    const customValidator = (rule, value) => {
-      return value == "2"; // value值等于2的时候，校验规则通过，不提示本规则中自定义的message（“不对喔！”）
-    }
-    const customValidator2 = (rule, value) => {
-      return value != "2"; // value值不等于2的时候，校验规则通过，不提示本规则中自定义的message（“答对啦！”）
-    }
-
-    const customAsyncValidator = (rule, value) => {
-      return value == "3"; // value值等于3的时候，校验规则通过，不提示本规则中自定义的message（“不对喔！（async）”）
-    }
-    const customAsyncValidator2 = (rule, value) => {
-      let reg = /^[\d]+(\s+[\d]+)*$/;
-      return reg.test(value); 
-    }
-
-    const customValidator3 = (rule, value) => {
-      return value == "2"; // value值等于2的时候，校验规则通过，不提示本规则中自定义的message
-    }
-    return {
-      dFormTemplateValidate3,
-      formModel,
-      customValidator,
-      customValidator2,
-      customAsyncValidator,
-      customAsyncValidator2,
-      customValidator3,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-#### 验证单个元素，自定义管理消息提示
-
-> done
-
-配置`messageShowType`可选择消息自动提示的方式，默认为`popover`。
-
-- 设置为`popover`错误信息将在元素聚焦时以`popover`形式呈现。
-
-- 设置为`text`错误信息将自动以文本方式显示在元素下方(需要与表单控件容器配合使用)。
- 
-- 设置为`none`错误信息将不会自动呈现到视图， 可在模板中获取`message`或通过监听`messageChange`事件获取错误`message`， 或在模板中直接通过引用获取。
-
-- 在 `options`中配置  `popPosition`可在消息提示方式为`popover`时，自定义`popover`内容弹出方向， 默认为`['right', 'bottom']`。更多取值参考popover组件。
-
-:::demo
-
-```vue
-<template>
-  <d-form ref="dFormTemplateValidate4" :formData="formModel" labelSize="lg" >
-    <d-form-item prop="sum">
-      <d-form-label>计算：1 + 1 = ？</d-form-label>
-      <d-form-control extraInfo="messageShowType为none，不显示提示文字">
-        <d-input v-model="formModel.sum" v-d-validate-rules="{
-          messageShowType: 'none',
-          rules: {
-            validators: [
-              {message: '不对喔！', validator: customValidator}
-            ]
-          },
-          options: {
-            updateOn: 'change'
-          }
-        }" />
-      </d-form-control>
+    <d-form-item field="executionDay" label="Execution day">
+      <d-checkbox-group v-model="formData.executionDay" label="Execution day" direction="row">
+        <d-checkbox label="Mon" value="Mon" />
+        <d-checkbox label="Tue" value="Tue" />
+        <d-checkbox label="Wed" value="Wed" />
+        <d-checkbox label="Thur" value="Thur" />
+        <d-checkbox label="Fri" value="Fri" />
+        <d-checkbox label="Sat" value="Sat" />
+        <d-checkbox label="Sun" value="Sun" />
+      </d-checkbox-group>
     </d-form-item>
-    <d-form-item prop="asyncSum">
-      <d-form-label>计算：1 + 2 = ？</d-form-label>
-      <d-form-control extraInfo="messageShowType为popover，使用popover进行提示">
-        <d-input v-model="formModel.asyncSum" v-d-validate-rules="{
-          rules: {
-            asyncValidators: [
-              {message: '不对喔！（async）', asyncValidator: customAsyncValidator}
-            ]
-          },
-          options: {
-            updateOn: 'input',
-            messageShowType: 'popover',
-            popPosition: 'bottom'
-          }
-        }" />
-      </d-form-control>
+    <d-form-item field="datePickerPro" label="Date Picker Pro">
+      <d-date-picker-pro v-model="formData.datePickerPro"></d-date-picker-pro>
     </d-form-item>
-  </d-form>
-
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormTemplateValidate4 = ref(null);
-    let formModel = reactive({
-      sum: '',
-      asyncSum: '',
-    });
-
-    const customValidator = (rule, value) => {
-      return value == "2"; // value值等于2的时候，校验规则通过，不提示本规则中自定义的message（“不对喔！”）
-    }
-
-    const customAsyncValidator = (rule, value) => {
-      return value == "3"; // value值等于3的时候，校验规则通过，不提示本规则中自定义的message（“不对喔！（async）”）
-    }
-
-    return {
-      dFormTemplateValidate4,
-      formModel,
-      customValidator,
-      customAsyncValidator,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-
-#### 验证单个元素，自定义asyncDebounceTime
-
-> done
-
-
-对于异步校验器，提供默认300ms debounce time。在options中设置`asyncDebounceTime`显示设置（单位ms）。
-
-
-:::demo
-
-```vue
-<template>
-  <d-form ref="dFormTemplateValidate5" :formData="formModel" labelSize="lg" >
-    <d-form-item prop="asyncSum">
-      <d-form-label>计算：1 + 2 = ？（async）</d-form-label>
-      <d-form-control extraInfo="asyncDebounceTime为500">
-        <d-input v-model="formModel.asyncSum" v-d-validate-rules="{
-          rules: {
-            asyncValidators: [
-              {message: '不对喔！（async）', asyncValidator: customAsyncValidator}
-            ]
-          },
-          options: {
-            updateOn: 'input',
-            asyncDebounceTime: 500
-          }
-        }" />
-      </d-form-control>
+    <d-form-item field="rangeDatePickerPro" label="Range Date Picker Pro">
+      <d-range-date-picker-pro v-model="formData.rangeDatePickerPro"></d-range-date-picker-pro>
     </d-form-item>
-  </d-form>
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormTemplateValidate5 = ref(null);
-    let formModel = reactive({
-      asyncSum: '',
-    });
-
-    const customAsyncValidator = (rule, value) => {
-      return value == "3"; // value值等于3的时候，校验规则通过，不提示本规则中自定义的message（“不对喔！（async）”）
-    }
-    return {
-      dFormTemplateValidate5,
-      formModel,
-      customAsyncValidator,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-
-#### Form验证与提交
-
-> done
-
-点击提交按钮时进行验证，需指定name属性，并同时绑定d-form标签的submit事件才能生效。
-
-:::demo
-
-```vue
-<template>
-  <d-form name="userInfoForm" ref="dFormTemplateValidate6" :formData="formModel" labelSize="lg" @submit="onSubmit">
-    <d-form-item prop="name">
-      <d-form-label>Name</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.name" v-d-validate-rules="{
-          rules: {minlength: 2, message: '不能小于2个字符'},
-          options: {
-            updateOn: 'input',
-          }
-        }" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="age">
-      <d-form-label>Age</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.age" v-d-validate-rules="{
-          rules: {min: 1, message: '年龄需大于0'},
-          options: {
-            updateOn: 'input',
-          }
-        }" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-operation class="demo-form-operation">
-      <d-button type="submit" class="demo-btn">提交</d-button>
-      <d-button bsStyle="common" @click="resetForm">重置</d-button>
+    <d-form-operation class="form-operation-wrap">
+      <d-button variant="solid" @click="onClick">提交</d-button>
+      <d-button @click="onClear">清除校验结果</d-button>
+      <d-button @click="onReset">重置</d-button>
     </d-form-operation>
   </d-form>
 </template>
 
 <script>
-import {defineComponent, reactive, ref} from 'vue';
+import { defineComponent, reactive, ref, watch } from 'vue';
 
 export default defineComponent({
-  setup(props, ctx) {
-    const dFormTemplateValidate6 = ref(null);
-    let formModel = reactive({
-      name: '',
-      age: '',
-    });
-
-    const resetForm = () => {
-      dFormTemplateValidate6.value.resetFormFields();
-    }
-
-    const onSubmit = (e) => {
-      console.log('@submit')
-    }
-
-    return {
-      dFormTemplateValidate6,
-      formModel,
-      onSubmit,
-      resetForm,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-#### Form验证与提交，用户注册场景
-
-> doing
-
-对于自动错误提示的方式，在form中， 建议在dForm层统一设置`messageShowType`，需同时设置ref属性才能生效。
-
-
-:::demo
-
-```vue
-<template>
-  <d-form name="userInfoForm2" ref="dFormTemplateValidate7" :formData="formModel" labelSize="lg" @submit="onSubmit" v-d-validate-rules="{
-          rules: {message: '表单验证未通过'},
-        }" messageShowType="text">
-    <d-form-item prop="name">
-      <d-form-label>Name</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.name" v-d-validate-rules="{
-          rules: {minlength: 2, message: '不能小于2个字符'},
-          options: {
-            updateOn: 'input',
-          }
-        }" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="age">
-      <d-form-label>Age</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.age" v-d-validate-rules="{
-          rules: {min: 1, message: '年龄需大于0'},
-          options: {
-            updateOn: 'input',
-          }
-        }" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-operation class="demo-form-operation">
-      <d-button type="submit" class="demo-btn">提交</d-button>
-      <d-button bsStyle="common" @click="resetForm">重置</d-button>
-    </d-form-operation>
-  </d-form>
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormTemplateValidate7 = ref(null);
-    let formModel = reactive({
-      name: '',
-      age: '',
-    });
-
-    const resetForm = () => {
-      dFormTemplateValidate7.value.resetFormFields();
-    }
-
-    const onSubmit = (e) => {
-      console.log('@submit')
-    }
-
-    return {
-      dFormTemplateValidate7,
-      formModel,
-      onSubmit,
-      resetForm,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-### 响应式表单验证
-
-> done
-
-在`d-form`标签中指定校验规则rules，同时在`d-form-item`中指定`prop`的值为校验字段名。
-
-
-:::demo
-
-```vue
-<template>
-  <d-form ref="dFormReactiveValidate" :form-data="validateFormModel" :rules="rules">
-    <d-form-item prop="name">
-      <d-form-label :required="true" >Name</d-form-label>
-      <d-form-control>
-        <d-input v-model="validateFormModel.name" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="age">
-      <d-form-label :required="true" >Age</d-form-label>
-      <d-form-control>
-        <d-input v-model="validateFormModel.age" />
-      </d-form-control>
-    </d-form-item>
-  </d-form>
-
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormReactiveValidate = ref(null);
-    let validateFormModel = reactive({
-      name: 'AlanLee',
-      age: '24',
-    });
-    const rules = reactive({
-      name: [{ required: true, message: '不能为空', trigger: 'blur'}],
-      age: [
-        { 
-          required: true, 
-          message: '年龄不能小于0', 
-          trigger: 'blur',
-          validator: (rule, value) => value > 0
-        },
-        { 
-          required: true, 
-          message: '年龄不能大于120', 
-          trigger: 'input',
-          validator: (rule, value) => value < 120
-        }
-      ],
-    });
-
-    return {
-      dFormReactiveValidate,
-      rules,
-      validateFormModel,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-### 指定表单Feedback状态
-
-> done
-
-你可通过对d-form-control设置feedbackStatus手动指定反馈状态。当前已支持状态：`success`、`error`、`pending`。
-
-
-:::demo
-
-```vue
-<template>
-  <d-form ref="dFormFeedback" :form-data="formModel">
-    <d-form-item prop="name">
-      <d-form-label :required="true" >Name</d-form-label>
-      <d-form-control feedbackStatus="pending">
-        <d-input v-model="formModel.name" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="nickname">
-      <d-form-label :required="true" >Nickname</d-form-label>
-      <d-form-control feedbackStatus="success">
-        <d-input v-model="formModel.nickname" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="age">
-      <d-form-label :required="true" >Age</d-form-label>
-      <d-form-control feedbackStatus="error">
-        <d-input v-model="formModel.age" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="sex">
-      <d-form-label :required="true">Sex</d-form-label>
-      <d-form-control feedbackStatus="error">
-        <d-select v-model="formModel.sex" :options="sexSelectOptions" placeholder="Select your sex"></d-select>
-      </d-form-control>
-    </d-form-item>
-  </d-form>
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormFeedback = ref(null);
-    let formModel = reactive({
-      name: 'AlanLee',
-      nickname: 'AlanLee97',
-      age: '24',
-      sex: '男',
-    });
-
-    const sexSelectOptions = reactive([
-      '男', '女'
-    ])
-    
-    return {
-      dFormFeedback,
-      formModel,
-      sexSelectOptions,
-    }
-  }
-})
-</script>
-
-
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
-
-```
-
-:::
-
-
-可通过对具名插槽suffixTemplate在d-form-control中自定义反馈状态icon。
-
-
-:::demo
-
-```vue
-<template>
-  <d-form ref="dFormFeedback2" :form-data="formModel">
-    <d-form-item prop="address">
-      <d-form-label :required="true" >Address</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.address" />
-        <template v-slot:suffixTemplate>
-          <d-icon name="right-o" color="rgb(61, 204, 166)" />
-        </template>
-      </d-form-control>
-    </d-form-item>
-  </d-form>
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormFeedback2 = ref(null);
-    let formModel = reactive({
-      address: '深圳南山区',
-    });
-
-    return {
-      dFormFeedback2,
-      formModel,
-    }
-  }
-})
-</script>
-
-```
-
-:::
-
-
-### 表单协同验证
-
-> done
-
-在一些场景下，你的多个表单组件互相依赖，需共同校验（如注册场景中的密码输入与确认密码），通过自定义校验器实现校验规则（将密码输入与确认密码的值进行比较）。
-
-
-:::demo
-
-```vue
-<template>
-  <d-form name="togetherValidateForm" ref="dFormTogetherValidate" :form-data="formModel" labelSize="lg" @submit="onSubmit">
-    <d-form-item prop="username">
-      <d-form-label :required="true" >Username</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.username" v-d-validate-rules="formRules.userNameRule" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="password">
-      <d-form-label :required="true" >Password</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.password" v-d-validate-rules="formRules.passwordRule" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="confirmPassword">
-      <d-form-label :required="true" >Confirm Password</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.confirmPassword" v-d-validate-rules="formRules.confirmPasswordRule" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-operation class="demo-form-operation">
-      <d-button type="submit" class="demo-btn">提交</d-button>
-      <d-button bsStyle="common" @click="resetForm">重置</d-button>
-    </d-form-operation>
-  </d-form>
-</template>
-
-<script>
-import {defineComponent, reactive, ref} from 'vue';
-
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormTogetherValidate = ref(null);
-    let formModel = reactive({
+  setup() {
+    const formRef = ref(null);
+    const formData = reactive({
       username: '',
-      password: '',
-      confirmPassword: '',
+      userInfo: '',
+      age: '',
+      select: 'Options2',
+      autoComplete: '',
+      executionDay: ['Tue'],
+      radio: '',
+      datePickerPro: '',
+      rangeDatePickerPro: ['', ''],
     });
-
-    const formRules = {
-      userNameRule: {
-        rules: {
-          minlength: 6,
-          message: '最小6个字符'
-        }
-      },
-      passwordRule: {
-        rules: {
-          minlength: 6,
-          message: '最小6个字符'
-        }
-      },
-      confirmPasswordRule: {
-        options: {
-          updateOn: 'input',
-        },
-        rules: {
-          minlength: 6,
-          message: '最小6个字符',
-          validators: [
-            {
-              message: '确认密码与密码不相符',
-              validator: (rule, value) => {
-                return value === formModel.password
-              }
-            }
-          ]
-        }
+    const selectOptions = reactive(['Options1', 'Options2', 'Options3']);
+    const source = ref(['C#', 'C', 'C++']);
+    const checkAge = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error('年龄不能为空'));
       }
-    }
+      setTimeout(() => {
+        if (value < 18) {
+          return callback(new Error('年龄不能小于18'));
+        } else {
+          callback();
+        }
+      }, 1000);
+    };
 
-    const resetForm = () => {
-      dFormTogetherValidate.value.resetFormFields();
-    }
+    const checkRangeDatePickerPro = (rule, value, callback) => {
+      if (!value || (!value[0] && !value[1])) {
+        return callback(new Error('请选择日期范围'));
+      } else if (!value[0]) {
+        return callback(new Error('请选择开始日期'));
+      } else if (!value[1]) {
+        return callback(new Error('请选择结束日期'));
+      } else {
+        return callback();
+      }
+    };
 
-    const onSubmit = (e) => {
-      console.log('@submit')
-    }
+    const rules = {
+      username: [{ min: 3, max: 6, message: '用户名需不小于3个字符，不大于6个字符', trigger: 'change' }],
+      userInfo: [{ required: true, message: '用户信息不能为空', trigger: 'blur' }],
+      age: [{ validator: checkAge }],
+      select: [{ required: true, message: '请选择', trigger: 'change' }],
+      autoComplete: [{ required: true, message: '请选择', trigger: 'change' }],
+      executionDay: [{ type: 'array', required: true, message: '请至少选择一个执行时间', trigger: 'change' }],
+      radio: [{ required: true, message: '请选择', trigger: 'change' }],
+      datePickerPro: [{ type: 'object', required: true, message: '请选择日期', trigger: 'change' }],
+      rangeDatePickerPro: [
+        { validator: checkRangeDatePickerPro },
+        { type: 'array', required: true, message: '请选择日期范围', trigger: 'change' },
+      ],
+    };
 
-    return {
-      dFormTogetherValidate,
-      formModel,
-      formRules,
-      resetForm,
-      onSubmit,
-    }
-  }
-})
+    const onClick = () => {
+      formRef.value.validate((isValid, invalidFields) => {
+        console.log(isValid);
+        console.log(invalidFields);
+      });
+    };
+
+    const onClear = () => {
+      formRef.value.clearValidate();
+    };
+
+    const onReset = () => {
+      formRef.value.resetFields();
+    };
+
+    return { formRef, formData, selectOptions, source, rules, onClick, onClear, onReset };
+  },
+});
 </script>
 
 <style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
+.form-operation-wrap > * {
+  margin-right: 8px;
 }
 </style>
-
 ```
 
 :::
 
-### 跨组件验证
+### Form 参数
 
-> todo
+| 参数名                         | 类型                                                      | 默认值             | 说明                                                                                            | 跳转 demo             |
+| :----------------------------- | :-------------------------------------------------------- | :----------------- | :---------------------------------------------------------------------------------------------- | :-------------------- |
+| data                           | `object`                                                  | {}                 | 必选，表单数据                                                                                  | [基础用法](#基础用法) |
+| layout                         | [Layout](#layout)                                         | 'horizontal'       | 可选，设置表单的排列方式                                                                        | [垂直排列](#垂直排列) |
+| label-size                     | [LabelSize](#labelsize)                                   | 'md'               | 可选，设置 label 的宽度，默认为 100px，sm 对应 80px，lg 对应 150px                              | [表单样式](#表单样式) |
+| label-align                    | [LabelAlign](#labelalign)                                 | 'start'            | 可选，设置水平布局方式下，label 对齐方式                                                        | [表单样式](#表单样式) |
+| rules                          | [FormRules](#formrules)                                   | --                 | 可选，设置表单的校验规则                                                                        | [表单校验](#表单校验) |
+| message-type                   | [MessageType](#messagetype)                               | 'popover'          | 可选，设置校验信息的提示方式                                                                    |                       |
+| pop-position                   | [PopPosition](#popposition)                               | ['right','bottom'] | 可选，消息显示为 popover 时，popover 弹出方向                                                   |                       |
+| validate-on-rule-change        | `boolean`                                                 | false              | 可选，是否在 rules 改变后立即触发一次验证                                                       |                       |
+| show-feedback                  | `boolean`                                                 | false              | 可选，是否展示校验结果反馈图标                                                                  |                       |
+| disabled                       | `boolean`                                                 | false              | 可选，是否禁用该表单内的所有组件。                                                              |                       |
+| size                           | [FormSize](#formsize)                                     | --                 | 可选，用于控制该表单内组件的尺寸                                                                |                       |
+| hide-required-mark             | `boolean`                                                 | false              | 可选，是否隐藏所有表单项的必选标记                                                              |                       |
+| style-type                     | [StyleType](#styletype)                                   | 'default'          | 可选，设置表单为灰色表单                                                                        |                       |
+| append-to-body-scroll-strategy | [AppendToBodyScrollStrategy](#appendtobodyscrollstrategy) | 'reposition'       | 可选，消息显示为 popover 时，滚动时 popover 处理策略，默认策略跟随宿主移动；`close`为滚动时关闭 |                       |
+|require-position|`string`|'left'|可选，必填型号的位置，可选值为`left`和`right`||
 
+### Form 事件
 
+| 事件名   | 回调参数                                                             | 说明               |
+| :------- | :------------------------------------------------------------------- | :----------------- |
+| validate | `Function(field: string, isValid: boolean, message: string) => void` | 表单项被校验后触发 |
 
+### Form 方法
 
-:::demo
+| 方法名         | 类型                                                             | 说明                                                      | 跳转 Demo             |
+| :------------- | :--------------------------------------------------------------- | :-------------------------------------------------------- | :-------------------- |
+| validate       | `(callback?: FormValidateCallback) => Promise`                   | 表单校验函数                                              | [表单校验](#表单校验) |
+| validateFields | `(fields: string[], callback?: FormValidateCallback) => Promise` | 校验指定字段                                              |                       |
+| resetFields    | `(fields: string[]) => void`                                     | 重置表单项的值，并移除校验结果                            |                       |
+| clearValidate  | `(fields: string[]) => void`                                     | 清除校验结果，参数为需要清除的表单项`field`，默认清除全部 |                       |
 
-```vue
-<template>
-  <d-form ref="dFormWithComponent" :form-data="formModel">
-    <d-form-item prop="name">
-      <d-form-label :required="true" >Name</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.name" />
-      </d-form-control>
-    </d-form-item>
-    <d-form-item prop="age">
-      <d-form-label :required="true" >Age</d-form-label>
-      <d-form-control>
-        <d-input v-model="formModel.age" />
-      </d-form-control>
-    </d-form-item>
-  </d-form>
-</template>
+### Form 插槽
 
-<script>
-import {defineComponent, reactive, ref} from 'vue';
+| 插槽名  | 说明             |
+| :------ | :--------------- |
+| default | 包裹整个表单内容 |
 
-export default defineComponent({
-  setup(props, ctx) {
-    const dFormWithComponent = ref(null);
-    let formModel = reactive({
-      name: 'AlanLee',
-      age: '24',
-    });
+### FormItem 参数
 
-    return {
-      dFormWithComponent,
-      formModel,
-    }
-  }
-})
-</script>
+| 参数名          | 类型                                            | 默认值 | 说明                                                                                                             | 跳转 demo             |
+| :-------------- | :---------------------------------------------- | :----- | :--------------------------------------------------------------------------------------------------------------- | :-------------------- |
+| label           | `string`                                        | ''     | 可选，表单项的名称                                                                                               | [基础用法](#基础用法) |
+| field           | `string`                                        | ''     | 可选，指定验证表单需验证的字段，验证表单时必选该属性                                                             | [基础用法](#基础用法) |
+| required        | `boolean`                                       | false  | 可选，表单选项是否必填                                                                                           |                       |
+| rules           | [FormRuleItem \| FormRuleItem[]](#formruleitem) | --     | 可选，表单项的校验规则                                                                                           | [表单校验](#表单校验) |
+| message-type    | [MessageType](#messagetype)                     | --     | 可选，用法同父组件`message-type`参数，优先级高于父组件，默认继承父组件的值                                       |                       |
+| pop-position    | [PopPosition](#popposition)                     | --     | 可选，用法同父组件`pop-position`参数，优先级高于父组件，默认继承父组件的值                                       |                       |
+| show-feedback   | `boolean`                                       | --     | 可选，是否展示校验结果反馈图标，优先级高于父组件，默认继承父组件的值                                             |                       |
+| help-tips       | `string \|`[helptips](#helptips)                | ''     | 可选，表单项帮助指引提示内容，空字符串表示不设置提示内容。可传入对象类型的参数来自定义提示内容的样式、展开方向等 | [基础用法](#基础用法) |
+| extra-info      | `string`                                        | ''     | 可选，附件信息，一般用于补充表单选项的说明                                                                       | [基础用法](#基础用法) |
+| feedback-status | [FeedbackStatus](#feedbackstatus)               | --     | 可选，手动指定当前 control 状态反馈                                                                              |                       |
 
-<style>
-.demo-form-operation {
-  display: flex;
-  align-items: center;
-}
-.demo-btn {
-  margin-right: 10px;
-}
-</style>
+### FormItem 方法
 
-```
-:::
+| 方法名        | 类型                           | 说明                           |
+| :------------ | :----------------------------- | :----------------------------- |
+| resetField    | `() => void`                   | 重置表单项的值，并移除校验结果 |
+| clearValidate | `() => void`                   | 清除校验结果                   |
+| validate      | `(trigger: string) => Promise` | 表单校验函数                   |
 
+### FormItem 插槽
 
+| 插槽名    | 说明                     |
+| :-------- | :----------------------- |
+| default   | 包裹单个表单项的输入控件 |
+| label     | 标签位置显示的内容       |
+| extraInfo | 自定义表单项额外信息     |
 
-### Form Attributes
+### Form 类型定义
 
-| 参数         | 说明                                                         | 类型   | 可选值                              | 默认值       |
-| ------------ | ------------------------------------------------------------ | ------ | ----------------------------------- | ------------ |
-| name         | 可选，设置表单name属性，进行表单提交验证时必选。             | string |                                     |              |
-| formData     | 必选，表单数据                                               | object |                                     |              |
-| layout       | 可选，设置表单的排列方式                                     | string | `horizontal`、`vertical`、`columns` | `horizontal` |
-| labelSize    | 可选，设置 label 的占宽，未设置默认为 100px，'sm'对应 80px，'lg'对应 150px | string | `sm`、`lg`                          | --           |
-| labelAlign   | 可选，设置水平布局方式下，label 对齐方式                     | string | `start`、`center`、`end`            | `start`      |
-| columnsClass | 可选，设置多列表单样式                                       | string |                                     |              |
-| rules        | 可选，设置表单校验规则                                       | object |                                     |              |
+#### Layout
 
-
-
-### Form Methods
-
-| 方法名 | 说明               | 参数 |
-| ------ | ------------------ | ---- |
-| submit | 可选，提交表单事件 | --   |
-
-
-
-### Form-Item Attributes
-
-| 参数         | 说明                                                 | 类型    | 可选值          | 默认值  |
-| ------------ | ---------------------------------------------------- | ------- | --------------- | ------- |
-| prop         | 可选，指定验证表单需验证的字段，验证表单时必选该属性 |         |                 |         |
-| dHasFeedback | 可选，设置当前 formControl 是否显示反馈图标          | boolean | `true`、`false` | `false` |
-
-
-
-### Form-Lable Attributes
-
-| 参数     | 说明                                                         | 类型    | 可选值          | 默认值  |
-| -------- | ------------------------------------------------------------ | ------- | --------------- | ------- |
-| required | 可选，表单选项是否必填                                       | boolean | `true`、`false` | `false` |
-| hasHelp  | 可选，表单项是否需要帮助指引                                 | boolean | `true`、`false` | `false` |
-| helpTips | 可选，表单项帮助指引提示内容，需配合 `hasHelp`使用，且`helpTips`的值不能为空字符串才会生效。 | string  |                 | --      |
-
-
-
-### Form-Control Attributes
-
-| 参数           | 说明                                                       | 类型    | 可选值          | 默认值  |
-| -------------- | ---------------------------------------------------------- | ------- | --------------- | ------- |
-| extraInfo      | 可选，附件信息，一般用于补充表单选项的说明                 | string  |                 | --      |
-| feedbackStatus | 可选，手动指定当前 control 状态反馈                        | boolean | `true`、`false` | `false` |
-| suffixTemplate | 可选，可传入图标模板作为输入框后缀（通过插槽传入icon组件） |         |                 | --      |
-
-
-
-### Directives
-
-#### v-d-validate-rules
-
-| 参数    | 说明               | 类型   | 可选值                                     | 默认值 |
-| ------- | ------------------ | ------ | ------------------------------------------ | ------ |
-| rules   | 必选，表单校验规则 | object |                                            | --     |
-| options | 可选，配置选项     | object | `errorStrategy`、`updateOn`、`popPosition` |        |
-
-> 该指令仅在`d-form`标签或`d-input`等表单类组件上使用有效。
-
-
-
-- rules格式如下
-
-```js
-{[validatorKey]: validatorValue, message: 'some tip messages.'}
+```ts
+type Layout = 'horizontal' | 'vertical';
 ```
 
-当前DevUI支持的内置校验器validatorKey有：`required`、`minlength`、`maxlength`、`min`、`max`、`requiredTrue`、`email`、`pattern`、`whitespace`。<br>
+#### LabelSize
 
+```ts
+type LabelSize = 'sm' | 'md' | 'lg';
+```
 
+#### LabelAlign
 
-<br>
+```ts
+type LabelAlign = 'start' | 'center' | 'end';
+```
 
-- options支持以下字段
-  - errorStrategy，错误更新策略：`dirty`（默认）、`prestine`
-  
-  - updateOn，校验时机，可选值有：`change`（默认）、 `blur`、 `input`
-  
-  - popPosition，自定义`popover`内容弹出方向。 默认为`['right', 'bottom']`，更多取值参考popover组件。
+#### FormRules
 
+```ts
+type FormRules = Partial<Record<string, Array<FormRuleItem>>>;
+```
 
+#### MessageType
 
+```ts
+type MessageType = 'popover' | 'text' | 'none';
+```
+
+#### PopPosition
+
+```ts
+type PopPosition =
+  | 'top'
+  | 'right'
+  | 'bottom'
+  | 'left'
+  | 'top-start'
+  | 'top-end'
+  | 'right-start'
+  | 'right-end'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'left-start'
+  | 'left-end';
+```
+
+#### FormSize
+
+```ts
+type FormSize = 'sm' | 'md' | 'lg';
+```
+
+#### FormValidateCallback
+
+`ValidateFieldsError`类型参考[async-validator](https://github.com/yiminghe/async-validator)。
+
+```ts
+type FormValidateCallback = (isValid: boolean, invalidFields?: ValidateFieldsError) => void;
+```
+
+#### StyleType
+
+```ts
+type StyleType = 'default' | 'gray';
+```
+
+#### AppendToBodyScrollStrategy
+
+```ts
+type AppendToBodyScrollStrategy = 'close' | 'reposition';
+```
+
+### FormItem 类型定义
+
+#### FormRuleItem
+
+`RuleItem`类型参考[async-validator](https://github.com/yiminghe/async-validator)。
+
+```ts
+interface FormRuleItem extends RuleItem {
+  trigger?: Array<string>;
+}
+```
+
+#### FeedbackStatus
+
+```ts
+type FeedbackStatus = 'success' | 'error' | 'pending';
+```
+
+#### HelpTips
+
+```ts
+interface HelpTips {
+  content: string; // 提示内容
+  position?: PopPosition[]; // 展开方向
+  trigger?: 'hover' | 'click'; // 触发方式
+  popType?: string; // 提示类型
+}
+```

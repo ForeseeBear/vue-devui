@@ -1,5 +1,7 @@
-.devui-radio-group {
-  display: flex;
+@import '@devui/theme/styles-var/devui-var.scss';
+
+.#{$devui-prefix}-radio-group {
+  display: inline-flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-items: flex-start;
@@ -12,8 +14,8 @@
     flex-direction: column;
   }
 
-  .devui-radio {
-    line-height: 28px;
+  .#{$devui-prefix}-radio__wrapper {
+    min-height: 28px;
 
     &:not(:last-child) {
       padding-right: 20px;

@@ -1,71 +1,62 @@
-import { computed, defineComponent, ref } from 'vue';
+import { defineComponent, toRefs, ref, reactive } from 'vue';
+import type { SetupContext } from 'vue';
 import { Icon } from '../../icon';
-import { buttonProps } from './button-types';
-
+import LoadingDirective from '../../loading/src/loading-directive';
+import { buttonProps, ButtonProps } from './button-types';
+import useButton from './use-button';
 import './button.scss';
 
 export default defineComponent({
   name: 'DButton',
+  directives: {
+    Loading: LoadingDirective,
+  },
   props: buttonProps,
-  setup(props, ctx) {
-    const buttonContent = ref<HTMLSpanElement | null>(null);
+  emits: ['click'],
+  setup(props: ButtonProps, ctx: SetupContext) {
+    const { icon, disabled, loading, nativeType } = toRefs(props);
+    const { classes, iconClass } = useButton(props, ctx);
+    const isMouseDown = ref(false);
+    const showWave = ref(false);
+    const waveStyle = reactive({
+      top: '0px',
+      left: '0px',
+    });
 
+    const showClickWave = (e: MouseEvent) => {
+      waveStyle.left = e.offsetX + 'px';
+      waveStyle.top = e.offsetY + 'px';
+      showWave.value = true;
+
+      setTimeout(() => {
+        showWave.value = false;
+      }, 300);
+    };
     const onClick = (e: MouseEvent) => {
-      if (props.showLoading) {
+      if (loading.value) {
         return;
       }
-      props.onClick?.(e);
-    }
-
-    const hasContent = computed(() => ctx.slots.default);
-
-    const btnClass = computed(() => {
-      const { btnStyle, size, position, bordered, icon } = props;
-      const origin = `devui-btn devui-btn-${btnStyle} devui-btn-${size} devui-btn-${position}`;
-      const borderedClass = bordered ? 'bordered' : '';
-      const btnIcon = !!icon && !hasContent.value && btnStyle !== 'primary' ? 'd-btn-icon' : '';
-      const btnIconWrap = !!icon ? 'd-btn-icon-wrap' : '';
-      return `${origin} ${borderedClass} ${btnIcon} ${btnIconWrap}`;
-    });
-
-    const iconClass = computed(() => {
-      if (!props.icon) {
-        return;
-      }
-      const origin = 'devui-icon-fix icon';
-      if (hasContent.value) {
-        return `${origin} clear-right-5`;
-      } else {
-        return origin;
-      }
-    });
+      showClickWave(e);
+      ctx.emit('click', e);
+    };
 
     return () => {
-      const {
-        icon,
-        type,
-        disabled,
-        showLoading,
-        width
-      } = props;
       return (
-        <div class="devui-btn-host" {...ctx.attrs} v-dLoading={showLoading}>
-          <button
-            class={btnClass.value}
-            type={type}
-            disabled={disabled}
-            style={{ width }}
-            onClick={onClick}
-          >
-            {!!icon ? (
-              <Icon name={icon} class={iconClass.value} />
-            ) : null}
-            <span class="button-content" ref={buttonContent}>
-              {ctx.slots.default?.()}
-            </span>
-          </button>
-        </div>
+        <button
+          class={[classes.value, isMouseDown.value ? 'mousedown' : '']}
+          disabled={disabled.value}
+          onClick={onClick}
+          type={nativeType.value}
+          onMousedown={() => (isMouseDown.value = true)}
+          onMouseup={() => (isMouseDown.value = false)}>
+          {icon.value && <Icon name={icon.value} size="var(--devui-font-size, 12px)" color="" class={iconClass.value} />}
+          <div class="loading-icon__container" v-show={loading.value}>
+            <d-icon name="icon-loading" class="button-icon-loading" color="#BBDEFB"></d-icon>
+          </div>
+          <span class="button-content">{ctx.slots.default?.()}</span>
+          {showWave.value && <div class="water-wave" style={waveStyle}></div>}
+        </button>
       );
-    }
-  }
+    };
+  },
 });

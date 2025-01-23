@@ -1,50 +1,40 @@
-import type { PropType, ExtractPropTypes, SetupContext } from 'vue'
+import type { ExtractPropTypes, PropType } from 'vue';
+import type { ICheck, IOperate, ITreeNode, IDragdrop, IInnerTreeNode } from './composables/use-tree-types';
 
-export interface TreeItem {
-  id: string
-  label: string
-  isParent?: boolean
-  level?: number
-  open?: boolean
-  addable?: boolean
-  editable?: boolean
-  deletable?: boolean
-  children?: TreeData
-  [key: string]: any
-}
-export interface SelectType {
-  [key: string]: 'none' | 'half' | 'select'
-}
-
-export interface ReverseTree {
-  id?: string
-  children?: string[]
-  parent?: ReverseTree 
-}
-
-export type TreeData = Array<TreeItem>
-
-export type CheckableRelationType = 'downward' | 'upward' | 'both' | 'none'
+const commonProps = {
+  check: {
+    type: [Boolean, String] as PropType<ICheck>,
+    default: false,
+  },
+  dragdrop: {
+    type: [Boolean, Object] as PropType<IDragdrop>,
+    default: false
+  },
+  operate: {
+    type: [Boolean, String, Array] as PropType<IOperate>,
+    default: false,
+  },
+};
 
 export const treeProps = {
   data: {
-    type: Array as PropType<TreeData>,
-    required: true,
-    default: () => [],
+    type: Object as PropType<ITreeNode[]>,
+    default: []
   },
-  checkable: {
-    type: Boolean,
-    default: false
+  ...commonProps,
+  height: {
+    type: [Number, String] as PropType<number | string>,
   },
-  checkableRelation: {
-    type: String as () => CheckableRelationType,
-    default: 'none',
-  }
-} as const
+};
 
-export type TreeProps = ExtractPropTypes<typeof treeProps>
+export const treeNodeProps = {
+  data: {
+    type: Object as PropType<IInnerTreeNode>,
+    default: {},
+  },
+  ...commonProps,
+};
 
-export interface TreeRootType {
-  ctx: SetupContext<any>
-  props: TreeProps
-}
+export type TreeProps = ExtractPropTypes<typeof treeProps>;
+
+export type TreeNodeProps = ExtractPropTypes<typeof treeNodeProps>;
